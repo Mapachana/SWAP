@@ -64,3 +64,19 @@ Una vez terminada la instalación le damos a reiniciar ahora y comprobamos que e
 ![](./img/so_config_15.png)
 ![](./img/so_config_16.png)
 
+Repetimos este mismo procedimiento con la otra máquina virtual.
+
+## Instalando los programas necesarios
+
+Primero vamos a instalar LAMP.
+
+> Foto instalacion lamp
+
+Comprobamos la versión y si se está ejecutando
+
+> Foto version y ejecucion
+
+## Configuración de la red
+
+Para disponer de conexión a internet y poder conectar las máquinas entre sí y con el anfitrión vamos a añadir un adaptador de red en modo NAT y otro adaptador de red en solo-anfitrión.
+
