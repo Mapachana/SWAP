@@ -118,3 +118,37 @@ Finalmente activamos la cuenta de root mediante el comando `sudo passwd root`:
 
 Repetimos toda esta configuración e instalación en la otra máquina virtual a crear.
 
+## Apache
+
+Comenzamos creando el archivo `swap.html` en el directorio `/var/www/html/`.
+
+![](./img/apache_1.png)
+
+Y ahora, desde la máquina m2 accedemos a esta página con curl:
+
+![](./img/apache_2.png)
+
+Análogamente se puede comprobar cambiando los roles de las máquinas m1 y m2.
+
+### Extra
+
+
+
+## SSH
+
+Para conectarnos entre las máquinas simplemente usamos el comando `ssh anabuenrua@<IP maquina>`. Comenzamos conectando de la máquina m1 a m2, y viceversa.
+
+![](./img/ssh_m1m2_1.png)
+
+![](./img/ssh_m2m1_1.png)
+
+### Extra
+
+
+
+## Curl
+
+
+
+### Extra
+
