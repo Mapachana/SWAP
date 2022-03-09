@@ -132,6 +132,25 @@ Análogamente se puede comprobar cambiando los roles de las máquinas m1 y m2.
 
 ### Extra
 
+En `/var/www` creamos la carpeta `prueba/public_html`:
+
+![](./img/apache_3.png)
+
+Y en este directorio creamos el archivo `index.html`.
+
+![](./img/apache_4.png)
+
+Cambiamos la propiedad de los archivos al usuario de apache con `sudo chown -R www-data: /var/www/prueba`.
+
+Creamos en `/etc/apache2/sites-available` el fichero `prueba.conf`.
+
+![](./img/apache_5.png)
+
+Finalmente comprobamos que no haya ningún fallo de sintaxis con `sudo apachectl configtest`, y al devolver `syntax OK`  habilitamos el nuevo archivo de host virtual con `sudo a2ensite domain1.com` y reiniciamos el servicio de apache con `sudo systemctl restart apache2`.
+
+
+
+
 
 
 ## SSH
@@ -148,7 +167,9 @@ Para conectarnos entre las máquinas simplemente usamos el comando `ssh anabuenr
 
 ## Curl
 
+Comprobamos que curl está instalado correctamente:
 
+![](./img/curl_1.png)
 
 ### Extra
 
