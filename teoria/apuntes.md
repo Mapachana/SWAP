@@ -362,3 +362,240 @@ En la planificación deberemos tener en cuenta:
 - La seguridad es muy importante.
 
 
+## Tema 2: Alta disponibilidad y escalabilidad
+
+### Brainstorming
+
+- ¿Cuánto tiempo está disponible un sistema para dar respuesta a usuarios?
+- ¿El sistema se adapta bien a más peticiones?
+
+### 1. Introducción
+
+- Usuarios (disponibilidad)
+  - Sitio web operativo **siempre** que se conecte.
+  - Tiempo de respuesta sea **rápido**.
+- Administradores (escalabilidad)
+  - Sitio web que se adapte a **más peticiones**.
+  - Tiempo de respuesta sea **rápido**.
+
+### 2. Concepto de alta disponibilidad
+
+- Es un protocolo de **diseño del sistema** y su implementación asociada que asegura un cierto **grado absoluto de continuidad operacional** durante un **período de medición** dado.
+
+- Capacidad de aceptar visitas las 24h todos los días.
+
+Cuando un sitio no está disponible se dice que se ha caído o sufre un problema de no-disponibilidad.
+
+- Tipos:
+  - Tiempo de no-disponibilidad (downtime) programado: Este tiempo está planeado, por ejemplo para actualizaciones del SO, aplicaciones o hardware.
+  - Tiempo de no-disponibilidad (downtime) no programado: Es impredecible. Para reducirlo una posible solución sería la redundancia.
+
+Solo debería haber tiempos de no-disponibilidad programados, y que estos sean lo más cortos posibles.
+
+#### 2.1 Medir la disponibilidad
+
+Medir la disponibilidad dando un porcentaje.
+
+- Escala "punto nueve":
+   100-(tiempoCaido / periodoTiempo) *100
+   Availability = Uptime / (Uptime + Downtime)
+
+Nota: Ambas ecuaciones son equivalentes
+
+Por ejemplo:
+  caída de 1 hora en 1 día -> 95.83333% de disponibilidad.
+  caída de 1 hora en 1 semana -> 99.404% de disponibilidad.
+
+Otro ejemplo:
+  Horas en un año (período) = 8760
+  Horas caído (tiempo caído) = 1830
+  Tiempo en activo = 8760-1830 = 6930
+  Disponibilidad = 6930/8760 = 0.791 -> 79.1%
+
+Lo ideal es tener un 100% de disponibilidad, esto significa no sufrir caídas no programadas.
+
+Los sitios web se conforman con alcanzar un 99.9% o 99.99% (medido en un año, porque si lo mides en 3 minutos y no se cae tienes un 100% de disponibilidad, pero tu medida no sirve de nada).
+
+##### 2.1.1 Disponibilidad con más de un servidor
+
+¿Cómo podemos calcular la disponibilidad de un sistema?
+
+Para un sistema s con n componentes su disponibilidad se calcula como:
+
+As = Ac1 * Ac2 * $\cdot$ * Acn
+
+Si tenemos dos servidores (web + BD) y cada uno tiene 99% la disponibilidad del sistema será 99*99=98.01%
+
+Siempre suponemos el peor caso, es decir, que esté caído el servidor web y justo después se caiga el de BD, luego si cada uno puede estar caído 3.65 días al año, podemos esperar que el sistema esté caído un total de 7.3 días en un año.
+
+Pero los sistemas reales son más complejos, hay muchos más elementos y algunos redundantes. Necesitamos fórmulas más complejas.
+
+Por ejemplo:
+
+> Foto
+
+Suponemos que si cualquier componente falla todo el sistema falla.
+
+La disponibilidad será:
+
+85 * 90 * 99.9 * 98 * 85 * 99 * 99.99 * 95 = 59.87%
+
+Al usuario le importa que el sistema proporcione el servicio. Si está caído, le dará igual que sea por el cortafuegos o por fallo de una aplicación web.
+
+##### 2.1.2
+
+Si el sistema tiene un componente replicado, la disponibilidad de esa parte del sistema completo será:
+
+A_NuevoC = Ac1 + ((1-Ac1) * Ac2)
+
+Por ejemplo, en el ejemplo anterior que el servidor web tenía disponibilidad de 85%, si lo replicamos tendríamos:
+
+disponibilidad_web2 = 0.85 + (1-0.85) * 0.85 = 0.9775
+disponibilidad_web2 = 85 + (100-85) * 85 = 97.75
+
+Antes teníamos un 59.87% para todo el sistema. ¿Qué disponibilidad tendremos si replicamos el servidor web y el cortafuegos?
+
+Cada uno de esos componentes (servidor web y cortafuegos) tendrán ahora 97.75%.
+
+Y el sistema:
+
+97.75 * 90 * 99.9 * 98 * 97.75 * 99 * 99.99 * 95 = 79.10%
+
+Se ha mejorado en 19.23%.
+
+Pasaríamos de unas 3500 horas de no-disponibilidad al año a unas 1830 horas de no-disponibilidad al año.
+
+Si replicáramos cada elemento de red, servidores e ISP, dejando un solo centro de datos:
+
+97.75 * 99 * 99.9999 * 99.96 * 97.75 * 99.99 * 99.99 * 99.75 = 94.3%
+
+Mejorado en 34.43%.
+
+Pasaríamos de unas 3500 horas de no-disponibilidad al año a unas 500 horas de no-disponibilidad al año.
+
+Si generalizamos la última ecuación para cuando replicamos dos componentes:
+
+$A_{nuevo} = AC_{n-1} + ( (1- AC_{n-1}) * AC_n)$
+
+Así, si hemos añadido un tercer servidor web:
+
+disponibilidad_web3 = 97.75 + (100 - 97.75) * 85 = 99.6625
+
+Y si añadimos un cuarto servidor web:
+
+disponibilidad_web4 = 99.6625 + (100-99.6625) * 85 = 99.949
+
+##### 2.1.3
+
+**Ejercicio**
+
+Calcular la disponibilidad del sistema si tenemos dos réplicas de cada elemento (en total 3 elementos en cada subsistema).
+
+> Foto
+
+#### 2.2 Cómo mejorar la disponibilidad
+
+El uso de **subsistemas redundantes** y monitorizarlos mejora la disponibilidad del sistema global.
+
+Surgen conceptos derivados:
+
+- Disponibilidad de red.
+- Disponibilidad de servidor.
+- Disponibilidad de servidor.
+
+Si la disponibilidad de red es baja, quizás haya que mejorar el ancho de banda, y no tenga sentido centrar esfuerzos en mejorar las aplicaciones.
+
+##### 2.2.1 Disponibilidad de la red
+
+El diseño debe tener **redundancia** a todos los niveles:
+
+- Conexión a internet.
+- Routers/cortafuegos/balanceadores.
+- Servidores.
+
+Si hay que recortar costes, algún elemento puede ser único: por ejemplo el rputer, si el proveedor se compromete a reemplazarlo en pocas horas.
+
+##### 2.2.2 Disponibilidad del servidor
+
+Casi cualquier elemento hardware del servidor puede fallar: CPU, memoria, discos, placas, etc.
+
+Existen productos en el mercado con cualquier **elemento duplicado**.
+
+Por ejemplo sistemas redundantes en el Curiosity (con doble placa).
+
+Puesto que casi cualquier elemento hardware del servidor puede fallar se pueden configurar los servidores con **redundancia mediante software**. Esto supone una mejora de la escalabilidad.
+
+**Monitorizar** la disponibilidad con las herramientas del SO.
+
+El desarrollador Emerson ofrece herramientas para monitorizar hardware y software.
+
+##### 2.2.3 Disponibilidad de las aplicaciones
+
+Es complicado medir las prestaciones de las aplicaciones.
+
+El funcionamiento de unos módulos afectan al de otras aplicaciones (dependencias).
+
+El desarrollador del SO suele facilitar herramientas para monitorizar también las aplicaciones en ejecución.
+
+Dependencia entre aplicaciones o módulos de aplicación:
+
+Si un módulo falla, el proceso no se completa, y la experiencia de usuario es mala.
+
+Desarrollar aplicaciones robustas -> hacerlas redundantes.
+
+Si una parte del proceso falla, que haya una alternativa para completarlo.
+
+### 3. Concepto de escalabilidad
+
+Cuando una persona sufre estrés, su capacidad para afrontar tareas se ve mermada.
+
+Cuando un sistema experimenta estrés. su capacidad para dar servicio también se ve afectada.
+
+Entendemos por estrés una alta demanda de recursos.
+
+Incremento del nivel de estrés:
+
+- Cambios en las aplicaciones.
+- Fallos o caídas de algunas partes del sistema.
+- Incremento del número de máquinas (si está mal configurado).
+- Incremento repentino del número de usuarios del sitio.
+- Etc.
+
+**Definiciones de escalabilidad**:
+- Capacidad de un sistema de manejar la carga, y el esfuerzo para adaptarse al nuevo nivel de carga.
+- Capacidad de adaptación y respuesta de un sistema con respecto al rendimiento del mismo a medida que aumentan de forma significativa el número de usuarios del mismo.
+
+Cuanto más abajo de la pirámide más impacta un aspecto en la escalabilidad, luego lo más relevante es el diseño.
+
+Si un sitio gana popularidad, o si llega una fecha señalada, puede incrementarse su carga.
+
+Para manejar esa carga, las empresas tienen más servidores de los necesarios normalmente.
+
+Decidir cómo **añadir más recursos al sistema** web es crucial en el diseño inicial y en el mantenimiento.
+
+En ocasiones, si la CPU del servidor está al 95% todo el tiempo, cambiándola puede ser suficiente para cierto nivel de carga. Pero si más adelante hay más carga, será insuficiente.
+
+Dos tipos de escalado:
+
+- Ampliación **vertical**: Incrementar la RAM, CPU, disco de un servidor.
+- Amplicación **horizontal**: Añadir máquinas a algún subsistema (servidores web, servidores de datos, etc).
+
+En ocasiones una ampliación vertical puede ser suficiente.
+
+¿Cómo analizar la sobrecarga?
+
+- Si la **CPU** está cerca del 100% todo el rato y el resto de subsistemas no está sobrecargado, sustituir por una CPU más potente.
+- Si el uso de **RAM** es muy alto, veremos un uso alto de disco (por swapping). Incrementando la cantidad de RAM mejoraremos el rendimiento.
+- Un **ancho de banda** insuficiente afectará al rendimiento. Contratando una mejor conexión será suficiente.
+
+
+
+
+
+
+
+
+
+
+
+
