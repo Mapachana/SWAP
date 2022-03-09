@@ -94,6 +94,14 @@ Comprobamos con el comando `ip address show` que la configuración se ha realiza
 
 ![](./img/red_6.png)
 
+Finalmente comprobamos mediante ping que podemos conectarnos entre las máquinas. La dirección ip de la máquina m1 es `192.168.56.101` mientras que la de la máquina m2 es `192.168.56.102`.
+
+Realizamos ping de m1 a m2 y después de m2 a m1, confirmando así que la red está bien configurada.
+
+![](./img/ping_m1m2.png)
+
+![](./img/ping_m2m1.png)
+
 
 ## Instalando los programas necesarios
 
