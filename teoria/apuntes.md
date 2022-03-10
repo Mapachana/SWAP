@@ -432,7 +432,7 @@ Pero los sistemas reales son más complejos, hay muchos más elementos y algunos
 
 Por ejemplo:
 
-> Foto
+![](./img/t2/1.png)
 
 Suponemos que si cualquier componente falla todo el sistema falla.
 
@@ -491,7 +491,7 @@ disponibilidad_web4 = 99.6625 + (100-99.6625) * 85 = 99.949
 
 Calcular la disponibilidad del sistema si tenemos dos réplicas de cada elemento (en total 3 elementos en cada subsistema).
 
-> Foto
+![](./img/t2/2.png)
 
 #### 2.2 Cómo mejorar la disponibilidad
 
@@ -565,6 +565,8 @@ Incremento del nivel de estrés:
 - Capacidad de un sistema de manejar la carga, y el esfuerzo para adaptarse al nuevo nivel de carga.
 - Capacidad de adaptación y respuesta de un sistema con respecto al rendimiento del mismo a medida que aumentan de forma significativa el número de usuarios del mismo.
 
+![](./img/t2/3.png)
+
 Cuanto más abajo de la pirámide más impacta un aspecto en la escalabilidad, luego lo más relevante es el diseño.
 
 Si un sitio gana popularidad, o si llega una fecha señalada, puede incrementarse su carga.
@@ -582,16 +584,87 @@ Dos tipos de escalado:
 
 En ocasiones una ampliación vertical puede ser suficiente.
 
+![](./img/t2/4.png)
+![](./img/t2/5.png)
+
 ¿Cómo analizar la sobrecarga?
 
 - Si la **CPU** está cerca del 100% todo el rato y el resto de subsistemas no está sobrecargado, sustituir por una CPU más potente.
 - Si el uso de **RAM** es muy alto, veremos un uso alto de disco (por swapping). Incrementando la cantidad de RAM mejoraremos el rendimiento.
 - Un **ancho de banda** insuficiente afectará al rendimiento. Contratando una mejor conexión será suficiente.
 
+---
 
+**Transformar el servidor web en una granja web**
 
+- Proceso complejo.
+- **Preparar aplicaciones** para distribuir la carga.
+- Configurar la red para soportar el tráfico creciente.
+- Configuración del **balanceo de carga** para formar un cluster web para cada servicio.
 
+Una granja web puede tener varios clusters web.
 
+### 4. Escalar un sitio web
+
+Tenemos que configurar tres niveles:
+
+- Máquinas como servidores web.
+- Aplicaciones.
+- Almacenamiento.
+
+#### 4.1 Nivel de web
+
+El **nivel de web** se puede configurar **balanceando la carga**: Uso de una máquina con software específico.
+
+![](./img/t2/6.png)
+
+También se puede usar un **balanceador hardware**:
+
+  - Local director (Cisco).
+  - ServerIron (Foundry).
+  - BigIP (F5).
+
+![](./img/t2/7.png)
+
+El balanceador pasa peticiones a los servidores según el tráfico de la red.
+
+Hay varios algoritmos para decidir qué máquina final servirá cada petición:
+
+- Por turnos (round-robin): Se van mandando por orden. Si hay 3 máquinas m1, m2 y m3, se van mandando por orden como m1 m2 m3 m1 m2 m3 m1 m2 m3...
+- Según el menor número de conexiones: Se manda una conexión nueva a la que tiene menos.
+- Por ponderación: Si una máquina tiene el triple de RAM que la otra, de cada 4 peticiones, 3 se asignan a la máquina con el triple de RAm, y 1 a la que tiene menos RAM.
+- Por prioridad: Se usa un esquema por prioridad.
+- Según el tiempo de respuesta: Se hace un ping a todas las máquinas y la que tenga el menor tiempo de respuesta se le manda a esa.
+
+Por si falla el balanceador de carga se pueden usar dos balanceadores de carga (redundancia).
+
+#### 4.2 Nivel de aplicaciones
+
+Escalar el **nivel de aplicaciones** requiere diseñar el software pensando en que se ejecute en varios servidores:
+
+- Paralelismo.
+- Transparencia de ubicación: no debe haber dependencia de una máquina concreta para ejecutarse la aplicación.
+
+Es importante diseñar las aplicaciones desde el principio para que se ejecuten en varios servidores.
+
+Adaptar posteriormente una aplicación dependiente de cierto servidor puede ser costoso.
+
+#### 4.3 Nivel de almacenamiento
+
+Escalar el **nivel de almacenamiento** es complejo y depende del tipo de servicios a ofrecer:
+
+- LDAP: Protocolo Ligero de Acceso a Directorios.
+- NFS: Sistema de archivos de red.
+- Bases de datos.
+
+Cada uno de estos mecanismos suele requerir mecanismos y configuraciones diferentes.
+
+### 5. Conclusiones
+
+- **Conceptos clave**: Escalabilidad y alta disponibilidad.
+- **Monitorización** para detectar problemas y determinar posibles mejoras del sitio web.
+- La escalabilidad se suele implementar **replicando servidores** para las mismas tareas.
+- Conseguir disponibilidad y escalabilidad mediante **balanceo de carga**.
 
 
 
