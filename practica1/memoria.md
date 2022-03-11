@@ -82,7 +82,7 @@ Y ahora, en nuestra máquina virtual configuramos la red solo-anfitrión:
 
 ![](./img/red_2.png)
 
-Arrancamos la máquina virtual para completar la configuración de la red editando el fichero `"/etc/netplan/00-installer-config.yaml"`:
+Arrancamos la máquina virtual para completar la configuración de la red editando el fichero `/etc/netplan/00-installer-config.yaml`:
 
 ![](./img/red_4.png)
 
@@ -102,6 +102,16 @@ Realizamos ping de m1 a m2 y después de m2 a m1, confirmando así que la red es
 
 ![](./img/ping_m2m1.png)
 
+### Configuración avanzada
+
+Para configurar la red, de nuevo se hará modificando el fichero `/etc/netplan/00-installer-config.yaml`. Vamos a asignar las direcciones IPs a mano, 192.168.56.101 a m1, y 192.168.56.102 a m2, asignando la máscara 255.255.255.0, por lo que añadimos un /24 al final de las ips.
+
+![](./img/red_avanzada_1.png)
+![](./img/red_avanzada_2.png)
+
+Hacemos los cambios efectivos con `sudo netplan apply`.
+
+Con `ip address show` confirmamos que los cambios se han hecho correctamente y con ping o ssh de nuevo comprobamos que podemos conectarnos entre las máquinas.
 
 ## Instalando los programas necesarios
 
@@ -274,7 +284,13 @@ Tras introducir las contraseñas una sola vez tras la ejecución del comando, ya
 
 ![](./img/ssh_clave_3.png)
 
+## Bibliografía
 
+- [https://www.cyberciti.biz/faq/howto-change-ssh-port-on-linux-or-unix-server/](https://www.cyberciti.biz/faq/howto-change-ssh-port-on-linux-or-unix-server/)
+- [https://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/](https://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/)
+- [https://curl.se/docs/manpage.html](https://curl.se/docs/manpage.html)
+- [https://www.tecmint.com/change-apache-port-in-linux/](https://www.tecmint.com/change-apache-port-in-linux/)
+- [https://linuxize.com/post/how-to-set-up-apache-virtual-hosts-on-ubuntu-18-04/](https://linuxize.com/post/how-to-set-up-apache-virtual-hosts-on-ubuntu-18-04/)
 
 
 
