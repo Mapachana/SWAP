@@ -248,11 +248,31 @@ Para conectarnos entre las máquinas simplemente usamos el comando `ssh anabuenr
 
 ### Cambiando el puerto
 
+Para cambiar el puerto por defecto que usa ssh cambiamos el fichero `/etc/ssh/sshd_config`, buscamos donde especifica el puerto 22 y lo sustituimos por (por ejemplo) 2022:
 
+![](./img/ssh_port_1.png)
+
+Y reiniciamos el servicio con `sudo systemctl restart ssh`.
+
+Probamos a conectarnos desde la máuqina m2 especificando el puerto, si no, no se conecta, como se muestra:
+
+![](./img/ssh_port_2.png)
 
 ### Accediendo sin contraseña
 
+Finalmente, vamos a configurar el acceso sin contraseña mediante clave pública. Para ello, en cada máquina vamos a generar una clave pública y una clave privada mediante el comando `ssh-keygen`, y dejamos todos los campos por defecto.
 
+![](./img/ssh_clave_1.png)
+
+Luego copiamos la clave ejecutando en m2: `ssh-copy-id -p 2022 anabuenrua@192.168.56.101`.
+
+![](./img/ssh_clave_2.png)
+
+Análogamente, en la máquina m1 se ejecuta: `ssh-copy-id anabuenrua@192.168.56.102`.
+
+Tras introducir las contraseñas una sola vez tras la ejecución del comando, ya no será necesario ingresarlas más.
+
+![](./img/ssh_clave_3.png)
 
 
 
