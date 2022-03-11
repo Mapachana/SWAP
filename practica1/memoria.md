@@ -130,7 +130,23 @@ Y ahora, desde la máquina m2 accedemos a esta página con curl:
 
 Análogamente se puede comprobar cambiando los roles de las máquinas m1 y m2.
 
-### Extra
+También podemos acceder desde el navegador usando la dirección ip de la máquina virtual.
+
+### Cambiando puertos
+
+Vamos a cambiar el puerto de escucha al 8081. Para ello comenzamos modificando el fichero `/etc/apache2/ports.conf` añadiendo `Listen 8081`:
+
+![](./img/apache_port_1.png)
+
+A continuación modificamos el archivo `/etc/apache2/sites-enabled/000-default.conf`:
+
+![](./img/apache_port_2.png)
+
+Comprobamos que está todo bien con `sudo apache2ctl configtest`, que nos devuelve `Syntax OK`, por lo que reiniciamos el servicio apache con `sudo systemctl restart apache2` y comprobamos que el cambio se ha hecho correctamente accediendo a la dirección ip especificando el puerto 8081:
+
+![](./img/apache_port_3.png)
+
+### Directorios virtuales
 
 En `/var/www` creamos la carpeta `prueba/public_html`:
 
@@ -148,8 +164,28 @@ Creamos en `/etc/apache2/sites-available` el fichero `prueba.conf`.
 
 Finalmente comprobamos que no haya ningún fallo de sintaxis con `sudo apachectl configtest`, y al devolver `syntax OK`  habilitamos el nuevo archivo de host virtual con `sudo a2ensite domain1.com` y reiniciamos el servicio de apache con `sudo systemctl restart apache2`.
 
+Finalmente comprobamos accediendo desde el navegador que funciona correctamente:
+
+![](./img/apache_virdir.png)
 
 
+### Redirección de puertos
+
+Como hemos configurado antes, se usa el puerto 8081. Ahora vamos a redireccionar las direcciones al puerto 80 para que las atienda el 8081.
+
+De nuevo en `/etc/apache2/ports.conf` nos aseguramos de que se escuche ambos puertos con `Listen 80` y `Listen 8081`.
+
+Ahora en `/etc/apache2/sites-enabled/000-default.conf` añadimos el bloque:
+
+![](./img/apache_redirect_1.png)
+
+Y ejecutamos `sudo aenmod proxy`, `sudo a2enmod proxy_http`.
+
+Finalmente reiniciamos el servicio: `sudo systemctl restart apache2`.
+
+Comprobamos que ahora podemos acceder al fichero `swap.html` desde el puerto 8080 en lugar del 8081 que es el por defecto:
+
+![](./img/apache_redirect_2.png)
 
 
 
