@@ -188,6 +188,55 @@ Comprobamos que ahora podemos acceder al fichero `swap.html` desde el puerto 808
 ![](./img/apache_redirect_2.png)
 
 
+## Curl
+
+Comprobamos que curl está instalado correctamente:
+
+![](./img/curl_1.png)
+
+Accedemos al fichero `swap.html` creado antes en M1 desde la máquina M2:
+
+![](./img/apache_2.png)
+
+Ahora vamos a usar la opción `-o` o `-output`, que escribe en un fichero la salida de curl en lugar de en la salida estándar.
+
+Por ejemplo, usando de nuevo el fichero `swap.html` escribiendolo en `fichero.html`:
+
+![](./img/curl_2.png)
+
+La opción `-0` sirve para que curl use la versión 1.0 de HTTP en lugar de su versión establecida internamente.
+
+Por ejemplo:
+
+![](./img/curl_3.png)
+
+La opción `-O` guarda el fichero con el nombre con el que está subido:
+
+![](./img/curl_4.png)
+
+### Usando métodos en curl
+
+Por defecto, las peticiones que se realizan son usando GET, pero se puede realizar cualquier petición (POST, PUT o DELETE) usando el argumento `--request` o `-X`.
+
+Por ejemplo, realizamos una petición POST adjuntado los datos de `name` y `email` con la opción `-d` como:
+`curl -X POST -d 'name=ana&email=anabuenrua@correo.ugr.es' https://example.com/contact.php`.
+
+Otro ejemplo usando DELETE:
+`curl -X "DELETE" https://example.com`
+
+### Cookies
+
+Con curl podemos manejar cookies mediante las opciones `-c`, para indicar el nombre del archivo donde se guardan las cookies y `-b`, para enviar las cookies.
+
+Comenzamos creando el archivo de las cookies:
+
+![](./img/curl_5.png)
+![](./img/curl_6.png)
+
+Y ahora enviamos las cookies:
+
+![](./img/curl_7.png)
+
 
 ## SSH
 
@@ -197,15 +246,15 @@ Para conectarnos entre las máquinas simplemente usamos el comando `ssh anabuenr
 
 ![](./img/ssh_m2m1_1.png)
 
-### Extra
+### Cambiando el puerto
 
 
 
-## Curl
+### Accediendo sin contraseña
 
-Comprobamos que curl está instalado correctamente:
 
-![](./img/curl_1.png)
 
-### Extra
+
+
+
 
