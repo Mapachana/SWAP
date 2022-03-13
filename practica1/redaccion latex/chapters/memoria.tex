@@ -19,11 +19,11 @@ Seleccionamos el idioma español, y en la siguiente pantalla en "detectar teclad
 
 En los siguientes pasos dejamos la configuración por defecto.
 
-Introduzco mi nombre y mi usuario de la ugr con contraseña "Swap1234" como se muestra en \eqref{instalacion_nombre}.
+Introduzco mi nombre y mi usuario de la ugr con contraseña \verb|Swap1234| como se muestra en \eqref{instalacion_nombre}.
 
 \begin{figure}
 \begin{center}
-\caption{Introduzco mi nombre y usuario de la ugr, con contraseña "Swap1234" durante la instalación de la máquina virtual m1-anabuenrua}
+\caption{Introduzco mi nombre y usuario de la ugr, con contraseña "Swap1234"  durante la instalación de la máquina virtual m1-anabuenrua}
 \label{instalacion_nombre}
 \includegraphics[scale=0.5]{so_config_11}
 \end{center}
@@ -132,7 +132,9 @@ Primero vamos a instalar LAMP, para ello ejecutamos el comando:
 sudo apt-get install apache2 mysql-server mysql-client
 \end{verbatim}
 
-Y comprobamos la versión usando \verb|apache2 -v| y si está en ejecución con \verb| sudo service apache2 status|, como se ve en \eqref{LAMP_estado}:
+Y comprobamos la versión usando \verb|apache2 -v| y si está en ejecución con 
+
+\verb| sudo service apache2 status|, como se ve en \eqref{LAMP_estado}:
 
 \begin{figure}[h!]
 \begin{center}
@@ -157,7 +159,7 @@ Email: anabuenrua@correo.ugr.es
 </HTML>
 \end{verbatim}
 
-Y comprobamos que se sirve esta página mediante el navegador web de nuestro navegador \eqref{swaphtml} o con curl \eqref{}.
+Y comprobamos que se sirve esta página mediante el navegador web de nuestro navegador \eqref{swaphtml} o con curl (lo comprobamos en la sección de curl).
 
 \begin{figure}[h!]
 \begin{center}
@@ -171,7 +173,7 @@ Análogamente se puede comprobar cambiando los roles de las máquinas m1 y m2.
 
 \section{Cambiando puertos}
 
-Vamos a cambiar el puerto de escucha al 8081. Para ello comenzamos modificando el fichero \verb|7etc/apache2/ports.conf| añadiendo la línea \verb|Listen 8081|.
+Vamos a cambiar el puerto de escucha al 8081. Para ello comenzamos modificando el fichero \verb|/etc/apache2/ports.conf| añadiendo la línea \verb|Listen 8081|.
 
 A continuación modificamos el archivo \verb|/etc/apache2/sites-enabled/000-default.conf| como se ve en \eqref{apache_puertos}:
 
@@ -195,7 +197,9 @@ Comprobamos que esté todo bien con \verb|sudo apache2ctl configtest|, que nos d
 
 \section{Directorios virtuales}
 
-En \verb|/var/www| creamos la carpeta \verb|prueba/public_html| con el comando \verb|sudo mkdir -p prueba/public_html|.
+En \verb|/var/www| creamos la carpeta \verb|prueba/public_html| con el comando 
+
+\verb|sudo mkdir -p prueba/public_html|.
 
 Y en este directorio creamos el archivo \verb|index.html| con el contenido:
 
@@ -207,7 +211,11 @@ Prueba de directorio virtual
 </HTML>
 \end{verbatim}
 
-Cambiamos la propiedad de los archivos al usuario de apache con \verb|sudo chown -R www-data: /var/www/prueba| y creamos en \verb|/etc/apache2/sites-availabl| el fichero \verb|prueba.conf|, como en \eqref{prueba_conf}
+Cambiamos la propiedad de los archivos al usuario de apache con 
+
+\verb|sudo chown -R www-data: /var/www/prueba| y creamos en 
+
+\verb|/etc/apache2/sites-available| el fichero \verb|prueba.conf|, como en \eqref{prueba_conf}
 
 \begin{figure}[h!]
 \begin{center}
@@ -217,7 +225,11 @@ Cambiamos la propiedad de los archivos al usuario de apache con \verb|sudo chown
 \end{center}
 \end{figure}
 
-Finalmente comprobamos que no haya ningún fallo de sintaxis con \verb|sudo apachectl configtest|, y al devolver \verb|syntax OK|  habilitamos el nuevo archivo de host virtual con \verb|sudo a2ensite domain1.com| y reiniciamos el servicio de apache con \verb|sudo systemctl restart apache2|.
+Finalmente comprobamos que no haya ningún fallo de sintaxis con \verb|sudo apachectl configtest|, y al devolver \verb|syntax OK|  habilitamos el nuevo archivo de host virtual con 
+
+\verb|sudo a2ensite domain1.com| y reiniciamos el servicio de apache con 
+
+\verb|sudo systemctl restart apache2|.
 
 Finalmente comprobamos accediendo desde el navegador que funciona correctamente, como en \eqref{apache_final}
 
@@ -245,7 +257,7 @@ Ahora en \verb|/etc/apache2/sites-enabled/000-default.conf| añadimos el bloque 
 \end{center}
 \end{figure}
 
-Y ejecutamos \verb|sudo aenmod proxy|, \verb|sudo a2enmod proxy_http|.
+Y ejecutamos \verb|sudo a2enmod proxy|, \verb|sudo a2enmod proxy_http|.
 
 Finalmente reiniciamos el servicio: \verb|sudo systemctl restart apache2|.
 
@@ -268,7 +280,7 @@ Accedemos al fichero \verb|swap.html|, creado antes en m1 desde la máquina m2 e
 \begin{figure}[h!]
 \begin{center}
 \caption{Accediendo al fichero swap.html de m1 desde m2 }
-\label{curl_2}
+\label{apache_2}
 \includegraphics[scale=0.5]{apache_2}
 \end{center}
 \end{figure}
@@ -313,7 +325,7 @@ Por defecto, las peticiones que se realizan son usando GET, pero se puede realiz
 
 Por ejemplo, realizamos una petición POST adjuntado los datos de \verb|name| y \verb|email| con la opción \verb|-d| como:
 \begin{verbatim}
-curl -X POST -d 'name=ana&email=anabuenrua@correo.ugr.es' https://example.com/contact.php
+curl -X POST -d 'name=ana&email=anabuenrua@correo' https://example.com/contact.php
 \end{verbatim}
 
 Otro ejemplo usando DELETE:
@@ -349,7 +361,9 @@ curl -b cookies.txt http://www.google.com
 
 \chapter{SSH}
 
-Para conectarnos entre las máquinas simplemente usamos el comando \verb|ssh anabuenrua@<IP maquina>|. Comenzamos conectando de la máquina m1 a m2, y viceversa, como se ve en \eqref{ssh_m1m2} y \eqref{ssh_m2m1}.
+Para conectarnos entre las máquinas simplemente usamos el comando 
+
+\verb|ssh anabuenrua@<IP maquina>|. Comenzamos conectando de la máquina m1 a m2, y viceversa, como se ve en \eqref{ssh_m1m2} y \eqref{ssh_m2m1}.
 
 
 \begin{figure}[h!]
