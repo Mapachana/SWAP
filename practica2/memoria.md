@@ -52,6 +52,22 @@ Finalmente, con `-P` podemos indicar el puerto. Por ejemplo de m2 a m1:
 ![](./img/enviar_13.png)
 ![](./img/enviar_14.png)
 
+## Utilizar Rsync
+
+Rsync ya está instalado en ambas máquinas, comprobamos su versión:
+
+![](./img/rsync_1.png)
+
+Ejecutamos chown para cambiar el propietario de la carpeta `var/www/`.
+
+![](./img/rsync_2.png)
+
+Y ejecutamos rsync en `m1`, para copiar los archivos a `m2`:
+
+![](./img/rsync_4.png)
+
+
+
 
 
 
