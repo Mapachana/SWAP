@@ -52,12 +52,11 @@ Uptime Institute, 24 7.
   - **Cableado**: Se usa un falso suelo para poner el cableado.
   - **Refrigeración**: Se usa el falso suelo y los armarios unos frente a otros para crear corrientes de aire para ventilar. Desde el suelo se manda aire frío y los ventiladores de los pcs están mirando al mismo pasillo. Así se forman pasillos fríos y pasillos calientes.
   - Los **datos** están aparte en como una caja cerrada hermética, donde se mete un gas y así en caso de incendio no se pierden los datos.
-  
 
 ![](./img/t1/3.png)
 
 El consumo (Green IT):
-  
+
 - Prácticamente el consumo de un CPD proviene del consumo del equipamiento del CPD y la climatización.
   - 38-63% corresponde a los sistemas (servidores y equipos.
   - 23-54% corresponde a la refrigeración.
@@ -78,7 +77,6 @@ _Tecnologías verdes son aquellas que contribuyen a la reducción en el consumo 
       - Tecnologías GRID.
       - El modelo cloud (cloud computing).
         - Modelo de servicios (SaaS, PaaS, IaaS).
-  
 #### 1.3 Virtualización
 
 Consumo (Green IT). Sirve para reducir el consumo del equipamiento.
@@ -362,6 +360,9 @@ En la planificación deberemos tener en cuenta:
 - La seguridad es muy importante.
 
 
+<div style="page-break-after: always;"></div>
+
+
 ## Tema 2: Alta disponibilidad y escalabilidad
 
 ### Brainstorming
@@ -501,7 +502,7 @@ Surgen conceptos derivados:
 
 - Disponibilidad de red.
 - Disponibilidad de servidor.
-- Disponibilidad de servidor.
+- Disponibilidad de aplicación.
 
 Si la disponibilidad de red es baja, quizás haya que mejorar el ancho de banda, y no tenga sentido centrar esfuerzos en mejorar las aplicaciones.
 
@@ -667,8 +668,333 @@ Cada uno de estos mecanismos suele requerir mecanismos y configuraciones diferen
 - Conseguir disponibilidad y escalabilidad mediante **balanceo de carga**.
 
 
+<div style="page-break-after: always;"></div>
 
 
+## Tema 3: La red de una granja web
+
+### Brainstorming
+
+- ¿Qué configuración de red es más adecuada para la granja web?
+- ¿Será segura?
+
+### 1. Introducción
+
+La construcción de una **red segura y escalable** es fundamental para cualquier servidor.
+
+Si la red no está bien estructurada, los servidores no pueden servir la información.
+
+El administrador/diseñador del sistema debe analizar las opciones de conexión a Internet y diseñar la aestructura de red.
+
+Debe separar las subredes corporativas y también conectar a redes privadas de proveedores.
+
+Hay que decidir el ancho de banda necesario a contratar.
+
+Todas estas decisiones de diseño implican un estudio del hardware y aplicaciones software disponibles:
+
+- Switch, hub, router, balanceador, etc.
+- Sistema operativo, monitorización, balanceo, etc.
+- Carga del sistema.
+
+La carga del sistema es D=S*V, donde S es tiempo de servicio (lo que tarda en usar cada elemento) y V la razón de visitas (veces que se utiliza un elemento). La D es la demanda.
+
+El elemento que tenga mayor demanda es el que va a bloquear.
+
+En los siguientes gráficos, la R es tiempo de respuesta y la X la productividad.
+
+![](./img/t3/1.png)
+
+### 2. Configurar la red del sistema Web
+
+La configuración de la red requiere:
+
+- Elegir el modelo de red más adecuado.
+- Elegir el hardware (estándar).
+- Estructurar la red aislando subredes.
+- Definir los puntos de entrada a las diferentes subredes.
+
+Conceptos:
+
+- Eje principal (backbone).
+- Zona segura (DMZ).
+- Front-rail / back-rail.
+- Redes seguras externas.
+
+### 3. EL eje principal de la red del sistema (Backbone)
+
+**Backbone**: Eje principal de enlace entre máquinas.
+
+Para que nos entendamos, es la línea principal que conecta varios servidores, ya sean servidores web, de base de datos, etc. Pero esta definición NO es formal.
+
+Se puede formar con:
+
+- Switch: Además de la funcionalidad del hub, hace que la información proveniente del ordenador de origen se envíe al de destino.
+- Router: Además de la funcionalidad del switch, interconectan varias redes y tienen la capacidad de escoger la mejor ruta para que los paquetes de datos lleguen a su destino.
+- Hub: Dispositivo sencillo; recibe datos procedentes de un ordenador para transmitirlo a todos los demás que estén conectados.
+
+Gestiona las comunicaciones entre servidores y redes:
+
+![](./img/t3/2.png)
+
+### 4. Configurar una zona segura (DMZ)
+
+Zona desmilitarizada o **DMZ** (demilitarized zone). 
+
+Área restringida o aislada y totalmente controlada.
+
+Este control se suele realizar con un cortafuegos.
+
+![](./img/t3/3.png)
+
+Quedan controlados los servicios y aplicaciones ofrecidos a otras redes externas al DMZ.
+
+Los servicios de la granja web se ofrecen de forma estándar mediante dirección IP y puerto.
+
+Los cortafuegos, routers y balanceadores de carga restringen el tráfico de entrada o salida.
+
+La comunicación entre backbones se hace mediante un cortafuegos o configurando servidores con doble tarjeta de red.
+
+La separación de las redes refuerza la seguridad del sistema.
+
+En el siguiente gráfico, Web01 y Web02 tienen doble tarjeta de red y los Ap01 y Ap02 se pueden considerar zona segura, porque solo se accede a ellos desde un sitio controlado.
+
+![](./img/t3/4.png)
+
+Existen varias alternativas para conectar la granja web a otras redes:
+
+- Configuración sin DMZ.
+- Configuración de DMZ simple.
+- Configuración de DMZ tradicional.
+- Configuración de DMZ doble.
+
+Van de menos seguras a más seguras. La más segura es la DMZ doble.
+
+#### 4.1 Configuración sin DMZ
+
+Tanto los **servidores** de la granja web como otras máquinas están conectadas a la **misma subred**.
+
+Se **comparten recursos** (incluso salida a Internet).
+
+Solo tiene sentido en empresas muy pequeñas donde no hay problemas de prestaciones.
+
+![](./img/t3/5.png)
+
+Problemas:
+
+- Compartición del ancho de banda (servidores y máquinas de escritorio).
+- Asegurar los servidores es más complicado.
+- Si uno de los servidores se ve comprometido, el resto de recursos puede ser atacado.
+- Las máquinas de escritorio suponen un problema de seguridad.
+
+#### 4.2 Configuración de DMZ simple
+
+Los **servidores** expuestos deben **aislarse** con un cortafuegos.
+
+Servidores web en una red y servidores de bases de datos o disco en otra, protegida con un cortafuegos. Así se protegen los servidores de bases de datos o disco y las máquinas de escritorio.
+
+![](./img/t3/6.png)
+
+Problemas:
+
+- Los servidores web están conectados directamente a Internet.
+- El cortafuegos puede ser un cuello de botella.
+- Los servidores y máquinas tras el cortafuegos aún comparten ancho de banda.
+- Las máquinas de escritorio aún están en la misma red que las BD.
+
+#### 4.3 Configuración de DMZ tradicional
+
+La idea es resolver los problemas de la configuración anterior:
+
+- Evitar ancho de banda de la red corporativa compartido.
+- Evitar inseguridad de los servidores expuestos.
+
+![](./img/t3/7.png)
+
+Problemas:
+
+- Dificultad para configurar correctamente el cortafuegos (controlar distintos tipos de redes).
+- El cortafuegos es un posible cuello de botella.
+- Si la configuración del cortafuegos tiene errores, entonces todo queda expuesto.
+
+#### 4.4 Configuración de DMZ doble
+
+- Configuración ideal para una granja web.
+- Se basa en **aislar todos los servidores** con varios **cortafuegos**.
+
+![](./img/t3/8.png)
+
+Es la **configuración más segura**:
+
+- El DMZ tiene un **front-rail** y un **back-rail**.
+- El delantero es un segmento de red conectado a internet.
+- Los servidores quedan protegidos con el cortafuegos.
+- El trasero está conectado a la subred interna (segura), y protegido con otro cortafuegos.
+
+### 5. Conectar servidores al front-rail
+
+Los servidores conectados al front-rail deben dar servicios a clientes a través de internet: HTTP, SMTP, POP3, FTP, etc.
+
+Otros servicios no se ofrecen por el front-rail: Bases de datos, terminal.
+
+Hay dos tipos de servidores:
+
+- **Single-NIC**: Conectado solo a la subred frontal; aislado de la trasera.
+- **Multi-NIC**: Conectado a la frontal y la trasera.
+
+![](./img/t3/9.png)
+
+Un servidor multi-NIC puede acceder a la subred trasera para consumir un recurso.
+
+Su configuración requiere de reglas específicas en la tabla de enrutamiento para encaminar el tráfico hacia la subred trasera.
+
+Hay que ser cuidadosos al establecer las reglas para no dejar caminos que comprometan la seguridad.
+
+### 6. Conectar servidores al back-rail
+
+Los servidores conectados a la subred trasera son accesibles:
+
+- desde subredes seguras y controladas.
+- o bin desde servidores con multi-NIC.
+
+La subred trasera no debe conectarse directamente a Internet.
+
+Se pueden conectar servidores single-NIC para servir aplicaciones, BD o disco.
+
+El cortafuegos protege los servidores. Sus reglas deben dejar acceso a ciertas aplicaciones y servicios según tipo de usuario.
+
+![](./img/t3/10.png)
+
+### 7. Resumen de configuraciones
+
+Resumen de las configuraciones de los servidores y a qué subred pueden acceder:
+
+- **Doble conexión al front-rail y back-rail**:
+  - Requiere doble tarjeta de red.
+  - Adecuado para acceder a internet y servidores internos.
+  - Configuración apra servidores HTTP, SMTP, POP3, FTP, etc.
+  - Ofrecen servicios hacia Internet y a las subredes seguras.
+- **Conexión solo al front-rail**:
+  - Requiere solo una tarjeta de red.
+  - Adecuado para acceder solo a Internet.
+  - Los servicios ofrecidos quedan aislados.
+  - Configuración para servidores HTTP, SMTP, POP3, FTP, etc.
+  - Ofrecen servicios hacia Internet.
+- **Conexión solo al back-rail**:
+  - Requiere solo una tarjeta de red.
+  - Para servidores que no necesitan acceso a Internet.
+  - Servicios ofrecidos a las redes corporativas/seguras.
+  - Configuración para servidores de BD o aplicaciones.
+
+### 8. Conectar la granja web a Internet
+
+La conexión a internet depende de varios factores para **asegurar la calidad del servicio y la seguridad**:
+
+- Calidad del servicio y ancho de banda.
+- Filtrado y bloqueo de paquetes.
+- Network Address Translation (NAT).
+
+#### 8.1 Calidad del servicio y ancho de banda
+
+La **calidad del servicio** está directamente relacionada con el **ancho de banda** para salir a Internet.
+
+**Ancho de banda**: Cantidad de información que puede fluir por una conexión de red en un período determinado. Se mide en bits por segundo (kpbs, Mbps, Gbps, Tbps).
+
+Es adecuado definir qué porcentaje del ancho de banda se reserva para cada tipo de tráfico (HTTP, SSL, FTP,...). Los routers actuales permiten establecer esos parámetros.
+
+Queda determinado por los métodos de señalización, las tarjetas de red y los demás equipos de red.
+
+![](./img/t3/11.png)
+
+#### 8.2 Filtrado y bloqueo de paquetes
+
+Conviene establecer filtros de forma que solo le llegue a una máquina el tráfico que debe llegarle.
+
+Otros tipos de tráfico se bloquearán para que no le lleguen. Aunque los ignorase, los **paquetes sobrecargan la red**.
+
+![](./img/t3/12.png)
+
+Los paquetes contienen información de IP origen, IP destino y puerto (servicio), por lo que esta información se usará para el filtrado.
+
+Se pueden usar **cortafuegos**, routers o concentradores.
+
+![](./img/t3/13.png)
+
+**Routers**: Un router de filtrado de paquete utiliza reglas para determinar la autorización o denegación del tráfico según:
+
+- Dirección IP de origen.
+- Dirección IP de destino.
+- Tipo de mensaje ICMP.
+- Puerto TCP/UDP de origen.
+- Puerto TCP/UDP de destino.
+
+"Una ACL es una lista secuencial de sentencias de permiso o denegación que se aplican a direcciones IP o protocolos de capa superior".
+
+![](./img/t3/14.png)
+
+¿Cómo funcionan las ACL?
+
+Las ACL no actúan sobre paquetes que se originan en el mismo router.
+
+Las ACL se configuran para ser aplicadas al tráfico entrante o saliente.
+
+Las sentencias de la ACl operan ne orden secuencial. Esto es importante para primero permitir y luego bloquear y no al revés.
+
+Una sentencia implícita final cubre todos los paquetes para los cuales las condiciones no resultan verdaderas (implicit deny any statement/deny all traffic).
+
+![](./img/t3/15.png)
+
+#### 8.3 Network Address Translation (NAT)
+
+Con NAT mapeamos una dirección pública a una dirección privada de una de las máquinas servidoras internas.
+
+Mejora la seguridad: Se ocultan las verdaderas IP de los servidores últimos (back-end). 
+
+Esto lo pueden hacer los routers, cortafuegos y balanceadores de carga.
+
+Incluso podemos poner varios niveles:
+
+- El cortafuegos filtra los paquetes.
+- El balanceador distribuye.
+
+![](./img/t3/16.png)
+
+### 9. Conectar la granja web a redes seguras
+
+Algunas organizaciones necesitan los servicios de otras empresas (por ejemplo bancos).
+
+Para ello se conectan a redes seguras de esas empresas.
+
+La conexión a redes aseguradas es similar a la conexión a Internet, pero con menos riesgos.
+
+Hay que poner un **mecanismo de filtrado y bloqueo de paquetes** para evitar posibles ataques desde las máquinas de esas redes.
+
+Hay que tener en cuenta las necesidades de los usuarios en relación a los servicios que queremos obtener de la empresa.
+
+Podemos realizar la conexión mediante cortafuegos o mediante protocolos seguros (SSL).
+
+**Por ejemplo**: Queremos usar los servicios de un banco para cobrar con tarjeta de crédito (operación de riesgo).
+
+Se haría mediante conexión segura controlada por el banco.
+
+El banco nos intala un router para conectarnos a su red.
+
+![](./img/t3/17.png)
+
+Instalar una interfaz de red dedicada y conectada a ese router en los servidores que vayan a consumir ese tipo de servicio.
+
+Por ejemplo configurar un servidor en el back-rail como pasarela para las operaciones con tarjeta de crédito.
+
+### 10. Conclusiones
+
+- La configuración de la red de la granja web se puede hacer de varias formas.
+- La más segura es con el doble DMZ (subred frontal+ subred trasera).
+- Los usuarios acceden desde Internet a los servidores conectados en la subred frontal.
+- Las máquinas en la subred trasera dan servicios a los usuarios en la red corporativa y a los servidores de la subred frontal.
+- En la calidad de servicio influye:
+  - El ancho de banda de conexión a Internet.
+  - El filtrado y bloqueo de paquetes.
+  - El balanceo de la carga entre los servidores.
+- Se pueden obtener servicios externos conectando a redes seguras (por ejemplo un banco).
 
 
 
