@@ -140,8 +140,23 @@ Finalmente comprobamos que nos podemos conectar de m1 a m2 sin contraseña de nu
 
 ![](./img/ssh_8.png)
 
+## Crontab
 
+Comenzamos añadiendo una tarea que sincronice completamente las carpetas `/var/www/` de m1 y de m2 cada hora.
 
+Para conseguirlo, usamos crontab para programar la ejecución del comando de `rsync` cada hora, editando el fichero `/etc/crontab` como sigue:
+
+![](./img/crontab_1.png)
+
+Como opciones avanzadas, tenemos que mientras `*` es para cualquier valor y se pueden especificar varios valores concretos separados por `,`, hay formas más fáciles de especificar cuándo ejecutar ciertas tareas.
+
+Por ejemplo, `-` indica un rango, y `/` el paso o salto. Así, si añadimos la siguiente tarea para escribir "hola" en un fichero `cronprueba.log` cada 2 horas los días 1,2 y 3 (de 1 a 3) sería:
+
+![](./img/crontab_2.png)
+
+`00 0-23/2 1-3 * * root echo "hola" >> cronprueba.log`
+
+Vemos que hemos especificado los minutos a 00 y en las de horas de 0 a 23 cada 2, en los días 1 a 3.
 
 
 
