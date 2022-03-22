@@ -66,6 +66,39 @@ Y ejecutamos rsync en `m1`, para copiar los archivos a `m2`:
 
 ![](./img/rsync_4.png)
 
+Las opciones usadas son `-a`, que indica recursividad (archive), `-e` especifica el shell remoto que se va a utilizar, `-v` es verbose, para dar más información y `-z` para comprimir los archivos durante la trasnferencia.
+
+### Opciones avanzadas
+
+Como opciones avanzadas vamos a usar `--stats`, que nos muestra estadísticas, `--exclude`, para excluir carpetas o directorios, `--delete`, para borrar en la máquina destino los ficheros borrados de la máquina origen y `--dry-run`, que permite a rsync hacer un "clonado de prueba", de forma que podemos ver lo que se va a clonar pero sin llegar a efectuarse la copia.
+
+Comenzamos creando un directorio de prueba a clonar desde m1 a m2:
+
+![](./img/rsync_a1.png)
+
+Comenzamos realizando una prueba de lo que sería la copia con `--dry-run`:
+
+![](./img/rsync_a2.png)
+
+Así, comprobamos que en efecto se va a mandar lo que queremos, pero todavía no hemos clonado nada, como podemos comprobar en la máquina m2:
+
+![](./img/rsync_a3.png)
+
+Ahora sí, procedemos a realizar el envío quitando la opción `--dry-run`:
+
+![](./img/rsync_a4.png)
+![](./img/rsync_a5.png)
+
+Es claro que el argumento `--exclude` ha evitado que se copie el directorio `nomandar`.
+
+Finalmente, probamos a eliminar el fichero `fichero1.txt` y repetir el clonado, comprobando así que la opción `--delete` lo elimina en `m2` también:
+
+![](./img/rsync_a6.png)
+![](./img/rsync_a7.png)
+
+
+
+
 
 
 
