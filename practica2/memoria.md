@@ -96,6 +96,51 @@ Finalmente, probamos a eliminar el fichero `fichero1.txt` y repetir el clonado, 
 ![](./img/rsync_a6.png)
 ![](./img/rsync_a7.png)
 
+## Acceso mediante ssh sin contraseña
+
+El acceso por ssh sin introducir la contraseña manualmente ya se configuró en la práctica anterior.
+
+Para ello, generamos en cada máquina una clave pública y privada, con `ssh-keygen`.
+
+![](./img/ssh_1.png)
+
+Después compartimos las claves públicas de una máquina a otra con `ssh-copy-id -p 2022 anabuenrua@192.168.56.101` (de m2 a m1) y `ssh-copy-id anabuenrua@192.168.56.102` (de m1 a m2).
+
+![](./img/ssh_2.png)
+
+### Opciones avanzadas
+
+Cuando se realizó, se dejaron todas las opciones por defecto, pero se pueden usar algunos argumentos para modificar el comportamiento:
+
+- `-t`: Especifica el tipo de clave que se va a generar, por ejemplo rsa.
+- `-b`: Indica el número de bits en la clave, por defecto es 2048.
+- `-f`: Especifica el archivo de la clave.
+- `-l`: No se usa al generar las claves, si no que se usa para ver el fingerprint de una clave pública.
+- `-v`: Verbose.
+
+`ssh-keygen -t rsa -b 4096`
+
+![](./img/ssh_3,png)
+
+Si al generar la clave no usamos la ruta por defecto, para mandarla con `ssh-copy-id` debemos especificar la ruta de la clave pública con `-i`, al igual que al acceder se especifica la de la clave privada con `-i` en `ssh`.
+
+### Copia de clave manual
+
+Comenzamos en m2, accediendo a `~/.ssh/authorized_keys`, donde está escrita la clave pública de `m1`. Editamos este fichero con nano borrandolo y comprobamos que ahora para acceder a m2 desde m1 nos pide contraseña:
+
+![](./img/ssh_4.png)
+![](./img/ssh_5.png)
+
+Para volver a tener acceso sin contraseña, vamos a mandar nuestra clave pública a m2. Para ello copiamos la clave pública que se encuentra en `~/.ssh/id_rsa.pub` de m1 mediante `scp` en el archivo `~/.ssh/authorized_keys` de m2:
+
+![](./img/ssh_6.png)
+![](./img/ssh_7.png)
+
+Finalmente comprobamos que nos podemos conectar de m1 a m2 sin contraseña de nuevo:
+
+![](./img/ssh_8.png)
+
+
 
 
 
