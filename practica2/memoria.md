@@ -120,7 +120,7 @@ Cuando se realizó, se dejaron todas las opciones por defecto, pero se pueden us
 
 `ssh-keygen -t rsa -b 4096`
 
-![](./img/ssh_3,png)
+![](./img/ssh_3.png)
 
 Si al generar la clave no usamos la ruta por defecto, para mandarla con `ssh-copy-id` debemos especificar la ruta de la clave pública con `-i`, al igual que al acceder se especifica la de la clave privada con `-i` en `ssh`.
 

@@ -198,6 +198,124 @@ Finalmente, probamos a eliminar el fichero \verb|fichero1.txt| y repetir el clon
 \end{center}
 \end{figure}
 
+\chapter{Acceso mediante ssh sin contraseña}
+
+El acceso por ssh sin introducir la contraseña manualmente ya se configuró en la práctica anterior.
+
+Para ello, generamos en cada máquina una clave pública y privada, con \verb|ssh-keygen|, como se muestra en \eqref{ssh_1}.
+
+\begin{figure}
+\begin{center}
+\caption{Generación de claves con ssh-keygen}
+\label{ssh_1}
+\includegraphics[scale=0.5]{ssh_1}
+\end{center}
+\end{figure}
+
+Después compartimos las claves públicas de una máquina a otra con \verb|ssh-copy-id -p 2022 anabuenrua@192.168.56.101| (de m2 a m1) y \verb|ssh-copy-id anabuenrua@192.168.56.102| (de m1 a m2). El caso de m2 a m1 puede verse en \eqref{ssh_2}
+
+\begin{figure}
+\begin{center}
+\caption{Envío de claves públicas mediante ssh-sopy-id}
+\label{ssh_2}
+\includegraphics[scale=0.5]{ssh_2}
+\end{center}
+\end{figure}
+
+\section{Opciones avanzadas}
+
+Cuando se realizó, se dejaron todas las opciones por defecto, pero se pueden usar algunos argumentos para modificar el comportamiento:
+
+\begin{itemize}
+\item \verb|-t|: Especifica el tipo de clave que se va a generar, por ejemplo rsa.
+\item \verb|-b|: Indica el número de bits en la clave, por defecto es 2048.
+\item \verb|-f|: Especifica el archivo de la clave.
+\item \verb|-l|: No se usa al generar las claves, si no que se usa para ver el fingerprint de una clave pública.
+\item \verb|-v|: Verbose.
+\end{itemize}
+
+Ejemplos de uso de estos argumentos son \verb|ssh-keygen -t rsa -b 4096| o \eqref{ssh_3}.
+
+\begin{figure}
+\begin{center}
+\caption{Opciones avanzadas de ssh-keygen}
+\label{ssh_3}
+\includegraphics[scale=0.5]{ssh_3}
+\end{center}
+\end{figure}
+
+Si al generar la clave no usamos la ruta por defecto, para mandarla con \verb|ssh-copy-id| debemos especificar la ruta de la clave pública con \verb|-i|, al igual que al acceder se especifica la de la clave privada con \verb|-i| en \verb|ssh|.
+
+\section{Copia de clave manual}
+
+Comenzamos en m2, accediendo a \verb|~/.ssh/authorized_keys|, donde está escrita la clave pública de \verb|m1|. Editamos este fichero con nano borrando su contenido y comprobamos que ahora para acceder a m2 desde m1 nos pide contraseña, \eqref{ssh_5}
+
+\begin{figure}
+\begin{center}
+\caption{Comprobación de que nos requiere contraseña para conectar mediante ssh tras borrar la clave previamente guardada.}
+\label{ssh_5}
+\includegraphics[scale=0.5]{ssh_5}
+\end{center}
+\end{figure}
+
+Para volver a tener acceso sin contraseña, vamos a mandar nuestra clave pública a m2. Para ello copiamos la clave pública que se encuentra en \verb|~/.ssh/id_rsa.pub| de m1 mediante \verb|scp| en el archivo \verb|~/.ssh/authorized_keys| de m2, como vemos en \eqref{ssh_6}.
+
+\begin{figure}
+\begin{center}
+\caption{Visualización y envío de la clave pública mediante scp y comprobación en la máquina m2 de que se ha realizado correctamente.}
+\label{ssh_6}
+\includegraphics[scale=0.5]{ssh_6}
+\includegraphics[scale=0.5]{ssh_7}
+\end{center}
+\end{figure}
+
+Finalmente comprobamos que nos podemos conectar de m1 a m2 sin contraseña de nuevo conectándonos por ssh como en \eqref{ssh_8}.
+
+\begin{figure}
+\begin{center}
+\caption{Conexión por ssh sin requerir introducir la contraseña.}
+\label{ssh_8}
+\includegraphics[scale=0.5]{ssh_8}
+\end{center}
+\end{figure}
+
+\chapter{Usando crontab}
+
+Comenzamos añadiendo una tarea que sincronice completamente las carpetas \verb|/var/www/| de m1 y de m2 cada hora.
+
+Para conseguirlo, usamos crontab para programar la ejecución del comando de \verb|rsync| cada hora, editando el fichero \verb|/etc/crontab| como sigue en \eqref{crontab_1}.
+
+\begin{figure}
+\begin{center}
+\caption{Configuración del fichero /etc/crontab para programar la sincronización con rsync cada hora.}
+\label{crontab_1}
+\includegraphics[scale=0.5]{crontab_1}
+\end{center}
+\end{figure}
+
+\section{Opciones avanzadas}
+
+Como opciones avanzadas, tenemos que mientras \verb|*| es para cualquier valor y se pueden especificar varios valores concretos separados por \verb|,|, hay formas más fáciles de especificar cuándo ejecutar ciertas tareas.
+
+Por ejemplo, \verb|-| indica un rango, y \verb|/| el paso o salto. Así, si añadimos la siguiente tarea para escribir "hola" en un fichero \verb|cronprueba.log| cada 2 horas los días 1,2 y 3 (de 1 a 3) sería editando el fichero \verb|/etc/crontab| como se ve en \eqref{crontab_2}
+
+\begin{figure}
+\begin{center}
+\caption{Configuración del fichero /etc/crontab para escribir hola en un fichero los días 1,2 y 3 cada 2 horas.}
+\label{crontab_2}
+\includegraphics[scale=0.5]{crontab_2}
+\end{center}
+\end{figure}
+
+\begin{verbatim}
+00 0-23/2 1-3 * * root echo "hola" >> cronprueba.log
+\end{verbatim}
+
+Vemos que hemos especificado los minutos a 00 y en las de horas de 0 a 23 cada 2, en los días 1 a 3.
+
+
+
+
 
 
 
