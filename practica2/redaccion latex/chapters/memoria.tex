@@ -205,7 +205,11 @@ Para ello, generamos en cada máquina una clave pública y privada, con \verb|ss
 \end{center}
 \end{figure}
 
-Después compartimos las claves públicas de una máquina a otra con \verb|ssh-copy-id -p 2022 anabuenrua@192.168.56.101| (de m2 a m1) y \verb|ssh-copy-id anabuenrua@192.168.56.102| (de m1 a m2). El caso de m2 a m1 puede verse en \eqref{ssh_2}
+Después compartimos las claves públicas de una máquina a otra con 
+
+\verb|ssh-copy-id -p 2022 anabuenrua@192.168.56.101| (de m2 a m1) y
+
+\verb|ssh-copy-id anabuenrua@192.168.56.102| (de m1 a m2). El caso de m2 a m1 puede verse en \eqref{ssh_2}
 
 \begin{figure}[h!]
 \begin{center}
@@ -288,9 +292,9 @@ Para conseguirlo, usamos crontab para programar la ejecución del comando de \ve
 
 \section{Opciones avanzadas}
 
-Como opciones avanzadas, tenemos que mientras \verb|*| es para cualquier valor y se pueden especificar varios valores concretos separados por \verb|,|, hay formas más fáciles de especificar cuándo ejecutar ciertas tareas.
+Como opciones avanzadas, tenemos que mientras \verb|'*'| es para cualquier valor y se pueden especificar varios valores concretos separados por \verb|','|, hay formas más fáciles de especificar cuándo ejecutar ciertas tareas.
 
-Por ejemplo, \verb|-| indica un rango, y \verb|/| el paso o salto. Así, si añadimos la siguiente tarea para escribir "hola" en un fichero \verb|cronprueba.log| cada 2 horas los días 1,2 y 3 (de 1 a 3) sería editando el fichero \verb|/etc/crontab| como se ve en \eqref{crontab_2}
+Por ejemplo, \verb|'-'| indica un rango, y \verb|'/'| el paso o salto. Así, si añadimos la siguiente tarea para escribir 'hola' en un fichero \verb|cronprueba.log| cada 2 horas los días 1,2 y 3 (de 1 a 3) sería editando el fichero \verb|/etc/crontab| como se ve en \eqref{crontab_2}
 
 \begin{figure}[h!]
 \begin{center}
