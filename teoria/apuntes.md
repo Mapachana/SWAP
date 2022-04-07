@@ -997,4 +997,464 @@ Por ejemplo configurar un servidor en el back-rail como pasarela para las operac
 - Se pueden obtener servicios externos conectando a redes seguras (por ejemplo un banco).
 
 
+<div style="page-break-after: always;"></div>
 
+
+## Tema 4: Balanceo de carga
+
+### 1. Introducción
+
+Inicialmente se usaban grandes mainframes como servidores.
+
+Pero esto tenía varias desventajas:
+
+- Caros de adquirir y mantener.
+- Hardware y software propietario.
+- Memoria y discos compartidos.
+
+Estas desventajas llevaron al desarrollo del **balanceo de carga**.
+
+Esto presenta bastantes ventajas:
+
+- Varias máquinas trabajando en paralelo es mejor que una sola máquina muy grande (y cara).
+- Si una máquina del grupo se rompe, se puede sustituir fácilmente.
+- Crear una granja web es más barato que adquirir un mainframe de la misma capacidad.
+
+Las tareas se pueden repartir entre grupos de servidores, pero ¿cómo repartir las tareas entre servidores?
+
+El **balanceo de carga** distribuye el tráfico entre varios servidores.
+
+Un dispositivo intercepta el tráfico, lo analiza y lo distribuye.
+
+![](./img/t4/1.png)
+
+Existen diversos dispositivos hardware y software que pueden hacer funciones de balanceo, por ejemplo los routers.
+
+- Los routers derivan los paquetes por diferentes caminos.
+
+Por otro lado, el balanceador realiza tareas adicionales:
+
+- Comprobar la disponibilidad y estado de los servidores.
+- Protege de diversos ataques.
+- Derivar en función del tipo de tráfico.
+
+### 2. Funcionamiento básico de un servidor
+
+El proceso tras teclear una URL en el navegador es:
+
+1. El navegador resuelve el nombre del sitio web (DNS).
+2. Ya con la IP, el navegador contacta por TCP.
+3. Justo a continuación, hace la petición HTTP.
+4. El servidor devuelve la página HTML completa.
+5. El navegador muestra la información.
+
+¿Y si queremos que varias máquinas sirvan nuestro contenido web? (Para disponer de más prestaciones).
+
+#### 2.1 Balanceo mediante DNS
+
+Configurar el DNS asignando tres IP diferentes al mismo sitio (misma dirección).
+
+Las DNS usan round-robin (por turnos), entonces primero se asigna una dirección, luego otra, otra...
+
+![](./img/t4/2.png)
+
+- Ventajas:
+  - Es muy sencilla de implementar.
+- Desventajas:
+  - Es una primera aproximación un poco rudimentaria.
+  - DNS no tiene información sobre la disponibilidad de cada máquina servidora final.ç
+
+Los DNS se inventaron para resolver (traducir) nombres a IP.
+
+#### 2.2 Granja web con balanceo de carga
+
+El balanceador se configura como punto de entrada para los usuarios.
+
+Todo el conjunto aparece como un solo sistema.
+
+VIP es Virtual IP, los usuarios solo conocen esta IP y es el balanceador el que gestiona por dentro.
+
+![](./img/t4/3.png)
+
+EL usuario recibe del DNS la IP pública del balanceador (VIP), que se ocupa de distribuir el tráfico.
+
+- Ventajas:
+  - Mejora la escalabilidad.
+  - Mejora la disponibilidad.
+  - Facilita el mantenimiento (arreglar o añadir máquinas sobre la marcha).
+  - Mejora la seguridad (servidores finales están protegidos).
+
+### 3. Conceptos del balanceo de carga
+
+Los conceptos a tener en cuenta son:
+
+- Modelo OSI.
+- Balanceador de carga.
+- VIP.
+- Servidor.
+- Grupo o cluster.
+- Niveles de acceso de usuario.
+- Redundancia.
+- Persistencia.
+- Disponibilidad de servicio.
+- Algoritmos de balanceo de carga.
+- Centro de datos.
+- NAT: Network Address Translation.
+
+#### 3.1 Modelo OSI
+
+Los concentradores y routers trabajan con IP y MAC. Reenvían tráfico a servidores.
+
+No pueden reenviar tráfico concreto a un servidor y para una aplicación concreta (no tienen en cuenta puertos).
+
+No pueden comprobar si una máquina está disponible.
+
+Se basan en el modelo OSI:
+
+Los protocolos IP, TCP, UDP, HTTP se mapean en las 7 capas:
+
+![](./img/t4/4.png)
+
+#### 3.2 Balanceador de carga
+
+Es un puente entre la red y los servidores finales.
+
+Puede manejar los protocolos de alto nivel.
+
+Puede manejar los protocolos de nivel de red.
+
+Protege los servidores finales.
+
+Puede ser un cacharro específico como el de la imagen o una máquina con software configurada para ello.
+
+![](./img/t4/5.png)
+
+#### 3.3 Virtual IP (VIP)
+
+Dirección pública a la que acceden los usuarios cuando piden un servicio al sistema.
+
+Suele ser la IP del balanceador de carga.
+
+Es la forma de hacer que el conjunto de máquinas de la granja web aparezca como una sola.
+
+![](./img/t4/6.png)
+
+#### 3.4 Servidor
+
+Dispositivo que ejecuta un servicio.
+
+En nuestro caso nos referiremos a servidores HTTP o servicios asociados (BD, NFS, FTP, SMTP).
+
+Según la topología de la reed, la IP del servidor será pública o privada (accesible a través de otro dispositivo de red que haga NAT).
+
+#### 3.5 Grupo o cluster
+
+Conjunto de servidores con un balanceador al frente para repartir la carga.
+
+Lo que estamos llamando "granja web".
+
+![](./img/t4/7.png)
+
+#### 3.5 Niveles de acceso de usuario
+
+Nos referimos a los permisos de control de los usuarios.
+
+Ejemplo: solo lectura, superusuario.
+
+Entre las políticas de acceso y seguridad se suele definir un tipo de usuario "administrador web", con más privilegios que un usuario normal, pero menos que "root", y que se utiliza para administrar las configuraciones de los servidores que tienen que ver con la web.
+
+#### 3.6 Redundancia
+
+Si un dispositivo falla, otro pasa a hacer su función.
+
+Se trata de evitar la degradación del servicio.
+
+Se suelen poner dos dispositivos idénticos que monitoricen el estado del otro:
+
+- Relación maestro-maestro.
+- Relación maestro-esclavo.
+
+Protocolo VRRP (Virtual Router Redundancy Protocol).
+
+#### 3.7 Comprobación de disponibilidad de servicio
+
+El balanceador debe comprobar regularmente si un servidor está activo o caído para reenviarle más tráfico.
+
+Se puede implementar con ICMP (ping) a los servidores finales.
+
+También comprobando contenido: accede a un servicio web específico y se espera una respuesta concreta por parte del servidor.
+
+#### 3.8 Algoritmos de balanceo de carga
+
+Hay varios algoritmos o estrategias de distribución del tráfico entre el grupo de servidores:
+
+- Por turnos o Round-Robin: Se hace por turnos, está bien si todas las páginas son iguales.
+-  Por prioridad: Unas máquinas tienen prioridad sobre otras por sus características o conexiones.
+-  Por ponderación: Similar a prioridad, se asignan pesos.
+-  Por número de conexiones: Se le da la conexión a la que menos conexiones tenga.
+
+Lo ideal sería una estrategia dinámica.
+
+El balanceador los implementa y los aplica según la configuración que hagamos.
+
+#### 3.9 Centro de datos
+
+Los equipos hardware están hospedados en un edificio con alta seguridad, refrigeración controlada, alimentación continua y sistemas antiincendios específicos.
+
+Se ocupa de la seguridad, alimentación, refrigeración y conexión.
+
+Ahorro en mantenimiento.
+
+#### 3.10 NAT: Network Address Translation
+
+El balanceador de carga hace traducción de direcciones.
+
+Toma los paquetes de entrada y cambia la IP de destino (la VIP por la IP privada de un servidor real final).
+
+Cuando el servidor sirve contenido, el balanceador hace el cambio de nuevo (pone la VIP en lugar de la IP final).
+
+Hay una opción **más eficiente**, que consiste en que el servidor final ya genera los paquetes con la VIP como origen (el balanceador se evita el trabajo).
+
+![](./img/t4/9.png)
+
+### 4. Otras tecnologías
+
+El balanceo de carga consiste en interceptar el tráfico para redirigirlo a varios servidores.
+
+Hay otras tecnologías similares:
+
+- Balanceo de carga en cortafuegos.
+- Balanceo de carga global.
+- Clustering.
+
+#### 4.1 Balanceo de carga en cortafuegos
+
+Se trata de estructurar varios cortafuegos de forma balanceada.
+
+Normalmente, un cortafuegos es una máquina más.
+
+La CPU tiene una limitación: 80Mbps.
+
+En algunos casos puede no ser suficiente, y la solución a esto es configurar varias máquinas como cortafuegos balanceados.
+
+#### 4.2 Balanceo de carga global
+
+Realizar balanceo de carga, similar al estudiado, pero entre centros de datos.
+
+![](./img/t4/10.png)
+
+Balanceo de carga entre centros de datos.
+
+El tráfico de cierto usuario va (generalmente) desde su navegador cliente hasta el centro de datos más cercano geográficamente.
+
+Una vez que las peticiones llegan a cierto centro de datos, se balancea también para distribuir entre el grupo de servidores.
+
+Se evita un retraso por el viaje de los paquetes a un centro situado a miles de kilómetros.
+
+Redundancia y balanceo: si un centro falla (corte de luz, maremoto, etc) el tráfico se redirige automáticamente a otro centro disponible.
+
+Se puede implementar con los DNS o BGP (Border Gateway Protocol).
+
+#### 4.3 Clustering
+
+Solución basada en la disponibilidad y escalabilidad.
+
+Técnica orientada a disponer de un cluster de máquinas que aceptarán grandes tareas computacionales.
+
+Ejecución paralela repartiendo el trabajo entre varias máquinas.
+
+Se accede por la máquina principal para lanzar trabajos (carga), y las máquinas del cluster trabajan juntas para dar el servicio (en este caso, de computación en lugar de servir peticiones).
+
+![](./img/t4/11.png)
+
+### 5. Estructura de la red
+
+Una instalación basada en el uso de balanceador queda representada en el siguiente esquema:
+
+![](./img/t4/12.png)
+
+El tráfico generado por el usuario va a través del balanceador hasta la máquina servidora final.
+
+La respuesta va hasta el cliente a través del balanceador.
+
+La configuración se basará en (1) **servidor con software** específico, o bien (2) **concentrador o switch** con funciones de balanceo.
+
+Cada opción tiene ventajas e inconvenientes:
+
+#### 5.1 1) Configurar un servidor como balanceador
+
+Existe software específico para configurar un PC como balanceador. Casi cualquier SO servirá.
+
+Usa algoritmos de reparto de carga conocidos que podemos configurar.
+
+Opciones de software libre: HAProxy, nginx, Apache, Pound, geekflare, gobetween.
+
+Opciones de software propietario: Local Director (cisco), BIG-IP (F5), NLB (Microsoft).
+
+#### 5.2 (2) Usar un dispositivo balanceador específico
+
+Dispositivos tipo "caja negra" que incluyen hardware y software para el balanceo.
+
+Un primer tipo usa **procesadores específicos** (ASIC, application specific integrated circuit) para realizar las tareas de modificación de paquetes.
+
+Procesadores extremadamente rápidos haciendo esas modificaciones (aunque no pueden realizar otras tareas que sí pueden hacer las CPUs de propósito general).
+
+Dispositivos que realmente son servidores con un SO comercial muy optimizado para realizar estas tareas.
+
+Productos de Cisco Systemas, Barracuda, Foundry Networks, Nortel Networks y Radware.
+
+Los balanceadores tipo caja-negra específicos resultan más rápidos que los basados en una máquina con software específico.
+
+**Balanceo con dispositivos hardware**
+
+Los balanceadores hardware están basados en un núcleo Linux/Unix que ejecuta los algoritmos estudiados.
+
+Fabricantes: Cisco Systems, Foundry Networks, Nortel Networks, F5 Networks, Radware.
+
+La funcionalidad descrita hasta ahora está soportada por los balanceadores hardware.
+
+Algunas funciones no se implementan en la mayoría del software de balanceo.
+
+Los balanceadores hardware son más eficientes que los sistemas basados en un ordenador con software específico.
+
+**Zevenet**: La configuración y control de su funcionalidad se puede hacer con interfaz de ventanas o por línea de comandos.
+
+**Funcionalidad**:
+
+- Los balanceadores no solo **organizan** la red y **reparten** tráfico entre los servidores de la granja, sino que **monitorizan** la disponibilidad y fallos en aplicaciones.
+- Algunos pueden balancear la carga de dispositivos como cortafuegos o concentradores.
+- Los balanceadores hardware tienen varios niveles de **redundancia**: configurar varios en paralelo, componentes internos redundantes (CPU, RAM, alimentación).
+- Podemos hacer configuraciones por parejas, tipo activo/pasivo o activo/activo. Si uno cae, el otro asume su carga.
+- Los balanceadores hardware mantienen y aseguran la **sesión de navegación** de los usuarios. Así se hace compatible el uso de cookies.
+- Si un grupo de servidores o un balanceador falla, el suplente puede copiar la información de sesión a otro grupo de servidores para mantener la navegación.
+- Los balanceadores permiten la entrada/salida de servidores de forma automática. Los monitoriza, y si uno falla, deja de enviarla tráfico, hasta que vuelva.
+- Hacen **traducción NAT**, y analizan las cabeceras TCP/IP para derivar tráfico al servidor más adecuado, en función del servicio solicitado.
+- Se pueden configurar para **evitar algunos ataques** del tipo TCP SYN, DoS, ping of death, IP spoofing, etc.
+- Los balanceadores hardware permiten servir el contenido estático directamente: **caching service**. 
+ 
+Así quitamos trabajo a los servidores finales.
+
+Analizan la petición HTTP y lo sirven de la forma más eficiente: o bien enviándolo a un grupo de servidores que servirán contenido estático o bien determinan el contenido estático más demandado y lo sirven directamente, cacheandolo en su memoria RAM.
+
+### 6. Algoritmos de balanceo de carga
+
+Los dispositivos y el software de balanceo ofrecen métodos y opciones para repartir la carga.
+
+Algunos métodos son estáticos, pero otros tienen en cuenta el estado de las máquinas servidoras.
+
+- Si las máquinas van a ser similares y vamos a servir contenido estático usaremos algoritmos estáticos.
+- Si las máquinas son heterogéneas y vamos a servir contenido dinámico usaremos algoritmos basacos en ponderación.
+
+Los algoritmos más comunes son:
+
+- Balanceo basado en turnos (round-robin).
+- Balanceo basado en el menor número de conexiones.
+- Balanceo basado en ponderación.
+- Balanceo basado en prioridad.
+- Balanceo basado en tiempo de respuesta.
+- Combinación de los algoritmos de tiempo de respuesta y menor número de conexiones.
+
+#### 6.1 Algoritmo de balanceo basado en turnos (round-robin)
+
+Imaginemos que están en una fila.
+
+El primero sirve la petición y pasa al final.
+
+![](./img/t4/13.png)
+
+El segundo servidor en servir es el servidor 2.
+
+![](./img/t4/14.png)
+
+Este algoritmo supone a todas las máquinas con la misma potencia.
+
+Es adecuado si todos tienen **potencia similar** o bien si vamos a servir aplicaciones o **servicios sencillos**.
+
+#### 6.2 Algoritmo de balanceo basado en el menor número de conexiones
+
+El balanceador lleva la cuenta del número de conexiones a cada servidor.
+
+Así repartiremos el trabajo según la utilización de cada una.
+
+![](./img/t4/15.png)
+
+Mientras que los servidores 1 y 2 no igualen al 3 en número de conexiones, seguirán recibiendo.
+
+Sólo entonces se le pasa trabajo al 3.
+
+![](./img/t4/16.png)
+
+Con este algoritmo se consigue una distribución del trabajo muy adecuada entre máquinas similares.
+
+Se evita la sobrecarga de las que puedan tener más trabajo.
+
+#### 6.3 Algoritmo de balanceo basado en ponderación
+
+Podemos asignar un peso a cada máquina.
+
+Así controlamos el % de conexiones que le pasamos a cada una.
+
+![](./img/t4/17.png)
+
+Si en una granja de 4 les damos 25% a cada una todas las máquinas trabajan igual.
+
+Si damos 50%, 20%, 15%, 15% entonces la primera se ocupa de la mitad del trabajo y las otras hacen menos.
+
+![](./img/t4/18.png)
+
+Se puede probar este algoritmo **cuando los dos anteriores no den buenos resultados**.
+
+Puede resultar adecuado:
+
+- cuando el número de conexiones no es un buen indicador.
+- el trabajo por turnos hace que se pierda tiempo en las máquinas más lentas.
+
+#### 6.4 Algoritmo de balanceo basado en prioridad
+
+Similar a la ponderación pero con grupos.
+
+Cada grupo tiene una prioridad y máximo de conexiones que puede atender.
+
+Hay reparto por turnos dentro del mismo grupo.
+
+![](./img/t4/19.png)
+
+Si un grupo recibe más peticiones de las que tiene establecidas entonces el siguiente grupo con más prioridad pasa a recibir.
+
+#### 6.5 Algoritmo de balanceo basado en tiempo de respuesta
+
+Método dinámico presente en todos los sistemas de balanceo de carga.
+
+Si una petición **tarda más** en una máquina concreta, es que está **más cargada** que el resto.
+
+Los balanceadores pueden ir calculando esos tiempos para decidir a qué máquina le pasa la siguiente petición.
+
+Algunos además pueden calcular y tener en cuenta el uso de CPU y memoria de cada máquina.
+
+#### 6.6 Combinación de los algoritmos de tiempo de respuesta y menor número de conexiones
+
+Algunos dispositivos balanceadores pueden usar combinaciones de métodos.
+
+Por ejemplo: tener en cuenta el tiempo de respuesta y el menor número de conexiones para elegir la máquina a la que enviar la siguiente petición.
+
+### 7. Balanceo de carga global
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div style="page-break-after: always;"></div>
+
+
+## Tema 5
