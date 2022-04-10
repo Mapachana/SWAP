@@ -188,5 +188,121 @@ Y relanzando de nuevo el servicio y accediendo a las estadísticas de nuevo:
 
 Si además se quisiera configurar el timeout, se usaría `stats timeout <n>s`.
 
+## Gobetween
+
+Comenzamos asegurandonos de que tanto nginx como haproxy no se estén ejecutando, y tras esto instalamos gobetween mediante snap ejecutando `sudo snap install gobetween --edge`:
+
+![](./img/gobet_1.png)
+
+Ahora lanzamos gobetween con `/snap/gobetween/current/bin/gobetween`:
+
+![](./img/gobet_2.png)
+
+Ahora, vamos a configurar gobetween, para ello nos basamos en el archivo de configuración de `/snap/gobetween/current/config/gobetween.toml`, y creamos el fichero de configuración `/snap/gobetween/gobetween_config.toml`:
+
+![](./img/gobet_3.png)
+
+Hemos dejado los parámetros por defecto que venían (defaults) y las métricas activadas, ya que esta configuración ya venía realizada en la configuración de ejemplo. Las opciones de healthcheck se explicarán en el apartado de opciones avanzadas.
+
+Y ahora lanzamos gobetween con la configuración establecida indicando el fichero. COmo vemos, no tenemos permiso de escucha para el puerto 80, y nos lanza este error:
+
+![](./img/gobet_4.png)
+
+Probamos de nuevo con sudo:
+
+![](./img/gobet_5.png)
+
+Y comprobamos que funciona:
+
+![](./img/gobet_6.png)
+
+### Opciones avanzadas
+
+Además de roundrobin, se puede usar IP-hash:
+
+![](./img/gobet_7.png)
+
+O menor número de conexiones:
+
+![](./img/gobet_8.png)
+
+Y por ponderación:
+
+![](./img/gobet_9.png)
+
+Adicionalmente, se ha configurado el último bloque, `healthcheck`, que comprueba el estado de los servidores mediante ping (pues se ha configurado con este método) cada 2 segundos, y debe llegar una respuesta antes de 500ms. Si esta respuesta no llegara, como se ha perdido una respuesta (parámetro fails está a 1), el servidor se considera caído (down), y se marcará de nuevo como operativo cuando llegue una respuesta de un ping (parámetro passes está a 1).
+
+En este caso, como gobetween no es un servicio, no hace falta desactivar que se lance automáticamente al encender la máquina virtual.
+
+## Zevenet
+
+Para configurar Zevenet, vamos a instalar una iso, que descargamos de https://es.zevenet.com/productos/comunidad/#repository.
+
+
+
+## Pound
+
+Tras asegurarnos de que ninguno de los otros softwares usados está en marcha, descargamos pound, para ello vamos a ejecutar:
+
+```
+sudo apt-get update
+sudo apt-get install pound
+```
+
+![](./img/pound_1.png)
+
+Y comprobamos que está funcionando con `sudo systemctl status pound`.
+
+Vamos a editar el fichero de configuración `/etc/pound/pound.cfg`:
+
+![](./img/pound_2.png)
+
+Y relanzamos el servicio con `sudo systemctl restart pound` y comprobamos que funciona:
+
+Pero no funciona, comprobamos el estado con `sudo systemctl status pound` y nos sale un mensaje diciendo que configuremos `startup=1` en `/etc/default/pound`:
+
+![](./img/pound_3.png)
+
+Accedemos a `/etc/default/pound` y lo editamos:
+
+![](./img/pound_4.png)
+
+Tras esto relanzamos el servicio y comprobamos que ahora sí funciona, y al haber establecido las prioridades con m1 el doble de m2, tenemos que m1 recibe el doble de peticiones que m2.
+
+### Opciones avanzadas
+
+Podemos añadir, por ejemplo, a las directibas globales `TimeOut`, que es el tiempo que se espera una respuesta del backend.
+
+https://linux.die.net/man/8/pound
+
+xHTTP define los verbos HTTP que se aceptan.
+
+Además, si usamos Emergency, el servidor solo se usará cuando el resto de servidores fallen:
+
+Editamos el fichero de configuración con estas opciones:
+
+![](./img/pound_5.png)
+
+![](./img/pound_6.png)
+
+Relanzamos el servicio y vemos que ahora solo nos atiende m1.
+
+Además, al igual que en los otros sistemas hay algo similar a la ip hash, para que las peticiones de la misma ip las atienda la misma máquina en un margen de tiempo.
+
+![](./img/pound_7.png)
+
+Y relanzando comprobamos que siempre nos atiende la misma máquina.
+
+Finalmente, y como con nginx y haproxy, se desactiva que se lance al inicio para evitar problemas por usar todos los servicios el mismo puerto con `sudo systemctl disable pound`.
+
+
+
+
+
+
+
+
+
+
 
 
