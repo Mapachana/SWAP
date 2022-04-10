@@ -1439,22 +1439,615 @@ Por ejemplo: tener en cuenta el tiempo de respuesta y el menor número de conexi
 
 ### 7. Balanceo de carga global
 
+Balanceo de carga global (GSLB, global server load balancing).
 
+GSLB parte de la idea del balanceo basado en DNS.
 
+Mejorar el sistema con los conceptos de "alta disponibilidad" y "tiempo de respuesta".
 
+Queremos evitar una caída total del sistema por un problema en el centro de datos (corte de luz, red, o desastre natural).
 
+**Distribuir** la carga entre varios centros.
 
+**Evitar retrasos** en las comunicaciones por las distancias entre el usuario y el servidor.
 
+**Redundancia** (si un centro falla, el tráfico se redirige a otro centro).
 
+![](./img/t4/20.png)
 
+Posibles implementaciones:
 
+- Uso del DNS.
+- Redirección HTTP.
+- GSLB basado en DNS.
+- GSLB usando protocolos de enrutamiento.
 
+#### 7.1 Primera aproximación: Uso del DNS
 
+DNS puede usarse para hacer balanceo de carga (turnos).
 
+El mismo funcionamiento podemos aprovecharlo para configurar a nivel de DNS las IP de los balanceadores de varios centros (granjas web).
 
+**Ventaja:** Así repartimos la carga entre los centros.
+**Desventaja:** Los DNS no pueden saber si uno de los centros está caído ni reencaminar el tráfico al centro más cercano.
+
+![](./img/t4/21.png)
+
+#### 7.2 Redirección HTTP
+
+El protocolo HTTP tiene un mecanismo para hacer redirección a otra URL.
+
+Así, si un usuario está en España y accede a la IP de una web, el servidor puede ver la IP del cliente, determinar dónde está exactamente, y redirigirlo a una parte de la web en español o a un servidor en España.
+
+**Ventaja:** Esta técnica no necesita hacer cambios en los DNS. Sólo programación web muy sencilla.
+**Desventaja:** necesita dos accesos (latencia). Cuello de botella en la IP.
+
+#### 7.3 GSLB basado en DNS
+
+Balanceo de carga a nivel del DNS para ayudar a seleccionar la IP del mejor sitio.
+
+DNS consiste en un conjunto jerárquico de servidores DNS. Cada dominio o subdominio tiene una o más zonas de autoridad (authoritative DNS).
+
+Publican la información acerca del dominio y los nombres de servicios de cualquier dominio incluido.
+
+Al inicio de esa jerarquía se encuentran los servidores raíz.
+
+![](./img/t4/22.png)
+
+Una opción es poner un **balanceador** como servidor DNS a **nivel de zona de autoridad**.
+
+La VIP del balanceador será a la que se enviarán las peticiones al servicio DNS.
+
+Forma en que casi todos los productos GSLB funcionan actualmente.
+
+![](./img/t4/23.png)
+
+**Otra tecnología** con la que podemos hacer la integración es configurar un balanceador como proxy.
+
+La idea es **poner un balanceador delante** del "authoritative DNS", de forma que algunas peticiones se pasarán al DNS directamente (y reenvía las respuestas también directamente).
+
+El balanceador GSLB deja pasar las respuestas para lo sitios que no requieren GSLB y hace tareas de DNS para los sitios que sí lo requieren.
+
+![](./img/t4/24.png)
+
+**El balanceador puede recoger la respuesta** y si hay más de un sitio disponible, la modifica para ofrecer el mejor sitio al cliente.
+
+El balanceador debe hacer ese trabajo extra para modificar la respuesta del DNS para aquellos nombres de dominio que requieren GSLB.
+
+El balanceador no tendrá implementada toda la funcionalidad de un DNS, sino solo la necesaria para mejorar la respuesta del DNS.
+
+Queda **determinar el mejor sitio a proponer** como respuesta, ya que es algo crítico y que debe decidir el balanceador GSLB a partir solo de la información intercambiada con el DNS local.
+
+El **GSLB está monitorizadno** continuamente el estado de **disponibilidad** de los diferentes sitios. Así, reenviará tráfico solo a los sitios activos.
+
+Esta tarea la puede realizar enviando una petición HTTP a cierta URL predefinida, para comprobar el código de retorno devuelto.
+
+Junto con esa petición HTTP, el balanceador GSLB puede **medir el tiempo de respuesta** que experimenta él.
+
+Cada sitio podrá aceptar un número de conexiones concurrentes diferentes. Esta capacidad de aceptar tráfico puede afectar al tiempo de respuesta, aunque no es determinante.
+
+Conviente que el **GSLB conozca la capacidad teórica** de conexiones concurrentes de cada sitio para reenviar tráfico hacia ese sitio. En principio esto mejorará la navegación de los usuarios, pero no asegura nada.
+
+Otra forma de determinar el mejor sitio al que reenviar el tráfico de cierto usuario es **usar información geográfica**.
+
+El GSLB no conoce la IP del usuario, pero sí conoce la del DNS local al usuario (suele ser un DNS cercano al mismo).
+
+La información geográfica **no es el mejor criterio** ya que un sitio más cercano puede estar colapsado por las conexiones.
+
+Existen webs que ofrecen información sobre los bloques de IPs asignadas a regiones (como ripe.net para Europa y África).
+
+Algunos productos para el GSLB basado en DNs son el 3DNS de F5 Networks.
+
+**Desventajas**:
+
+- GSLB es **complicado de configurar** y poner en funcionamiento, ya que la tecnología DNS no se desarrolló para hacer balanceo de carga.
+- El funcionamiento de las **cachés de los navegadores y sistemas operativos** hace que ciertas IP se guarden durante horas o incluso días, por lo que si las condiciones de cierto sitio cambian, el usuario seguirá enviando tráfico a dicho sitio. Una posible solución a esto es limpiar la caché del navegador.
+
+#### 7.4 GSLB usando protocolos de enrutamiento
+
+Independiente de la tecnología DNS.
+
+Utilizar a nivel de proveedor de servicio.
+
+La idea es tener la **dirección del sitio web** hospedada en **diferentes DNS**.
+
+Cuando un DNS responda al usuario con una IP para cierto dominio, esta aproximación dirigirá el tráfico al mejor sitio posible.
+
+Balanceadores de carga en sitios diferentes (A y B), todos configurados con la misma VIP.
+
+![](./img/t4/25.png)
+
+Para los routers solo hay **caminos** para los paquetes.
+
+A nivel de router, que existan dos sitios con la misma VIP signidica que **hay dos caminos** para llegar al mismo stio.
+
+Cuando un usuario A teclea una URL para ir al sitio web, el DNS le facilita la IP (en este caso, la VIP).
+
+El navegador cliente comienza la conexión enviando la petición a la VIP.
+
+Esta petición se propagará por la red y llegará al router A, que mirará en su tabla de enrutamiento para decidir por qué ruta lo envía.
+
+Encontrará dos "caminos" hasta la VIP, y en función de algún algoritmo de camino mínimo, decide hacia dónde enviar este tráfico.
+
+Como ejemplo de **protocolo de enrutamiento** cabe destacar OSPF (Open Shortest Path First).
+
+**Posible problema**: Cuando un usuario navega, abre varias conexiones TCP. Los routers recibirán los paquetes generados y los reenviarán hacia cualquiera de los balanceadores de los sitios,en función del estado de la red. Sin embargo, para que la comunicación funcione, todos los paquetes deben ir al mismo balanceador. Si en un momento, algún router decide cambiar la ruta hacia otro de los balanceadores, se perderá la integridad de la comunicación (las aplicaciones web necesitan mantener la persistenica en las comunicaciones).
+
+#### 7.5 Resumen
+
+- **Ventajas**:
+  - Alta disponibilidad.
+- **Desventajas**:
+  - Es muy complejo de implementar y comprender. Requiere conocimientos de los DNS.
+  - Si la aplicación web usa BD, estas deben estar sincronizadas entre los diversos sitios. Muy complejo.
+
+Para que GSLB funcione es necesario un entorno de red muy controlado, con alta coordinación entre los operadores.
+
+### 8. Ejemplo 1
+
+**Recorrido de un paquete a través de un balanceador**
+
+Veamos cómo funcionaría el tráfico de red a través de un sistema web con un balanceador de carga.
+
+Supongamos 4 máquinas servidoras:
+
+- m1 y m2 sirven HTTP.
+- m3 sirve FTP.
+- m4 sirve SMTP.
+- b hace de balanceador.
+
+Así se desacoplan las aplicaciones o servicios de las máquinas, dando alta flexibilidad.
+
+Un cliente establece una conexión TCP, envía la petición HTTP, recibe la respuesta y cierra la conexión TCP.
+
+b recibe en el inicio de la conexión un paquete que lleva como origen la IP del cliente y como destino la VIP del sistema web. También indica el puerto del servicio.
+
+b comprueba la disponibilidad de m1 y m2.
+
+b selecciona una de las dos máquinas y cambia en el paquete la VIP por la IP privada de la máquina a la que enviará ese tráfico de ese cliente.
+
+La máquina servidora envía datos como respuesta.
+
+Los paquetes pasan por el balanceador, que tiene que cambiar la IP privada de la máquina servidora por la VIP antes de enviar el paquete hacia el cliente (que espera recibir los paquetes con origen la VIP).
+
+### 9. Ejemplo 2
+
+**Diseño de la red de una empresa**
+
+Esquema a alto nivel, de la red de una empresa con unas necesidades especiales en cuanto a seguridad, escalabilidad y alta disponibilidad del sitio web.
+
+Pariremos del siguiente diseño de red:
+
+![](./img/t4/26.png)
+
+Modificar ese diseño inicial para mejorar la disponibilidad, escalabilidad y usabilidad:
+
+- Añadiremos dos routers así como dos conexiones replicadas a sendos proveedores de internet, replicando cortafuegos.
+- Podemos definir una zona segura de la red y mover los servidores web y FTP a esa zona DMZ.
+- Para realizar balanceo de carga, mejorando así la escalabilidad, disponibilidad y manejabilidad.
+- Replicar la instalación y configuración de red en varias localizaciones (países) para llevar a cabo balanceo global.
+
+![](./img/t4/27.png)
+
+![](./img/t4/28.png)
+
+ ### 10. Ejemplo 3
+
+ **Redes de distribución de contenidos**
+
+Los proveedores de contenido deben ofrecer el mejor tiempo de respuesta posible a los usuarios finales.
+
+Localizar los centros de datos cerca de los usuarios.
+
+Las empresas despliegan réplicas (caches) en diferentes centros de datos para servir el contenido estático.
+
+Una posibilidad es usar GSLB:
+
+![](./img/t4/29.png)
+
+Hay empresas que consiguen reducir los costes de este tipo de instalaciones usando los centros de datos existentes (especie de alquiler).
+
+Todo el coste de la instalación y mantenimiento de la red en varios centros de datos por todo el mundo se lo ahorra la empresa.
+
+Mediante GSLB se mejora la disponibilidad y el usuario experimenta menores tiempos de respuesta.
+
+### 11. Futuro de las tecnologías de balanceo
+
+Reduci **precios**, incrementar prestaciones y **funcionalidades**.
+
+Evolución de los balanceadores: cubrir las necesidades de servidores de ficheros, base de datos y otras aplicaciones.
+
+Mejora de las prestaciones y **reducción de la latencia**.
+
+Tareas relativas a la **seguridad**.
+
+Servir directamente **contenido estático** (espacio en RAM).
+
+El balanceador podrá integrar hardware y software para acelerar el procesamiento de datos SSL.
+
+### 12. Resumen y conclusiones
+
+El balanceo de carga ha permitido ofrecer más servicios a un número creciente de usuarios.
+
+El balanceador reparte el rtáfico web entre varios servidores, y realiza comprobaciones para asegurar la disponibilidad.
+
+Diversos algoritmos de balanceo de carga para repartir el tráfico entre los servidores.
+
+Aporta diversos beneficios: escalabilidad, disponibilidad, mantenimiento, seguridad, calidad de servicio.
 
 
 <div style="page-break-after: always;"></div>
 
 
-## Tema 5
+## Tema 5: Asegurar la granja web
+
+### 1. Introducción
+
+Asegurar la granja web es una tarea muy importante para cualquier sitio web.
+
+Puede permitir además, saber quién hizo cada cosa y en qué momento.
+
+La seguridad es fundamental para proteger los datos propiedad de la empresa y la información de los usuarios.
+
+El fin último es **evitar** (o al menos dificultar en lo posible) que un **hacker malicioso** realice cualquier acción que afecte al sistema.
+
+Se trata de **asegurar y mejorar la disponibilidad** del sitio y también de asegurarse de que las **operaciones** que se lleven a cabo en el sitio sean **seguras**.
+
+Las políticas de seguridad y los procedimientos para implementar esas políticas son clave en el diseño de una granja web.
+
+Los **objetivos de seguridad** deben definirse correctamente y se basan generalmente en los siguientes conceptos:
+
+- **Confidencialidad**: Las comunicaciones deben ser secretas.
+- **Integridad**: Los mensajes enviados deben ser exactamente los recibidos.
+- **Disponibilidad**: La comunicación con cualquier aplicación o servicio de la granja web debe estar disponible en el momenot en que sea requerida.
+
+En este tema trataremos:
+
+- Comprender el concepto de **defensa en profundidad** (diferentes capas de defensa).
+- Establecer **políticas de seguridad**, incluyendo claves seguras, para todas las cuentas.
+- Asegurar un servidor mediante la **eliminación de servicios** innecesarios y vulnerabilidades.
+- **Usar un cortafuegos**: Comprender el funcionamiento de los cortafuegos y los beneficios de estos.
+
+### 2. Defensa en profundidad
+
+Importanica de la **arquitectura de seguridad**.
+
+Incluso en el mundo real, se controla el acceso a los recursos de un edificio o empresa con varias capas.
+
+Por ejemplo, en un banco hay varios niveles de seguridad para proteger el dinero (varios sistemas de seguridad de diferente tipo que superar para hacerse con el dinero).
+
+(1) El dinero está guardado en cajas fuertes. Para acceder a ese dinero, los clientes deben identificarse.
+
+(2) El banco utiliza video-vigilancia y mantiene registros detallados de todas las transacciones.
+
+**Protección del sistema a diferentes niveles**
+
+Habría que **superar cada una de las capas** independientemente para acceder a los datos.
+
+![](./img/t5/1.png)
+
+¿Son necesarios tantos niveles¿ **Sí**.
+
+Ningún sistema de seguridad es totalmente seguro.
+
+La forma de **complicarle la tarea a un hacker malicioso** es poner más de un nivel de seguridad.
+
+**Incrementar el tiempo necesario para superar cada nivel** hace que sea más probable detectar un ataque, y así evitar que las últimas defensas se vean comprometidas.
+
+Es importante estar al día en cuanto a temas de seguridad en todos los frentes.
+
+El administrador responsable de la seguridad informática debe conocer los temas relativos a la seguridad así como las vulnerabilidades a nivel de red, de cortafuegos, de sistema operativo y de las aplicaciones en el sistema web.
+
+Hay que estar pendientes a los grupos de noticias, listas de correo, blogs y foros sobre estos temas.
+
+Cuando se identifica una vulnerabilidad, los administradores de seguridad deben **tomar medidas de prevención** ya que siempre habrá quien esté atento para aprovecharla.
+
+Estas investigaciones y estudios sobre seguridad en ciertas organizaciones suelen revelar puntos débiles de los sitemas web de otras en las que no se aplican políticas de seguridad.
+
+### 3. Políticas de seguridad
+
+Las políticas de seguridad **definen cómo se les permite interaccionar a los usuarios** con los servidores y el hardware del sistema web.
+
+Todas las polítcas definen:
+
+- **Procedimientos de identificación y acceso**.
+- O **privilegios de uso** (qué acciones puede llevar a cabo cada tipo de usuario).
+
+Los **procedimientos de identificación** comienzan solicitando una identificación (nombre de usuario + clave).
+
+De la validez de esta identificación dependerá que se permita o deniegue el acceso.
+
+¿Qué se suele utilizar?
+
+- Una clave o PIN.
+- Una tarjeta física que incluirá la clave.
+- Un escáner de retina, huella dactilar o ADN.
+
+Ordenador de menos efectivo a más efectivo.
+
+Usar **dos**, especialmente si el primero es una simple clave.
+
+Por ejemplo, algunas empresas usan dos factores:
+
+El primer, una tarjeta de identificación con la que se le permite a los empleados acceder a ciertas áreas.
+
+EL segundo suele ser una identificación (usuario y clave) en la red de ordenadores. Con ella podrá acceder a ciertos recursos, aunque a ciertas otras máquinas no.
+
+En los dominios de seguridad los administradores definen listas de control de acceso (usuario o grupos que pueden acceder a ciertos recursos concretos).
+
+**Tipo de sensores biométricos**:
+
+![](./img/t5/2.png)
+
+**Aplicar políticas a diferentes niveles**:
+
+- **Seguridad a nivel físico**: Asegurarnos de que no entren en las salas y roben las máquinas o los discos; ambiente refrigerado, cerradura de seguridad, viliancia, contraseñas de BIOS y de consola...
+- **Seguridad a nivel de red**: Cortafuegos, subred privada, ACL.
+- **Seguridad a nivel de administrador**: Administradores por tipo de servicio.
+- **Cuentas de servicios (o aplicaciones)**: Accesos controlados desde Internet (usuario "apache" o "www" + cuentas de aplicaciones).
+
+Toda organización con un gran sistema web debe tener un **equipo de ingenieros con dedicación exclusiva** a desarrollar, investigar, responder y arreglar temas de **seguridad** del sistema a todos los niveles.
+
+**Ética profesional**. Si soy un extrabajador de una empresa, conozco la política de seguridad y podría "fácilmente" tener acceso no permitido.
+
+### 4. Asegurar un servidor
+
+Proceso en el que eliminamos:
+
+- Características no necesarias.
+- Servicios.
+- Configuraciones.
+- Información de seguridad del servidor.
+
+De forma que solo se dejen las aplicaciones, servicios y puertos realmente necesarios.
+
+Hay dos fases:
+
+- Una vez que el servidor ha sido montado hacer **cambios de configuración** (instalación limpia).
+  - Eliminar cuentas y grupos de usuarios no necesarios.
+  - Renombrar las cuentas de administrador e invitado.
+  - Eliminar servicios no necesarios.
+  - Poner filtros TCP/IP.
+  - Equipo de seguridad al día.
+- **Mantenimiento continuo** para proteger de los ataques que van surgiendo.
+
+### 5. Cortafuegos
+
+Un cortafuegos protege el sistema de **accesos indebidos**.
+
+En un sistema sin cortafuegos, otros elementos del sistema quedarán expuestos a diferentes riesgos.
+
+Es el guardián de la puerta al sistema, permitiendo el **tráfico autorizado y denegando** el resto.
+
+Colocados entre subredes para realizar diferentes tareas de manejo de paquetes.
+
+Tareas que realizan:
+
+- **Bloquear y filtrar paquetes** de red inspeccionando las direcciones y puertos de cada paquete entre las subredes que separa y controla. Por defecto un cortafuegos debería **prohibir el tráfico**, y en el proceso de configuración de establecerán reglas para permitir cierto tipo de tráfico.
+- **Controlar protocolos de aplicación**, como HTTP, FTP, ssh o telnet. Esto se consigue configurando reglas relativas a ciertos puertos.
+- **Ocultar la verdadera dirección del servidor**, actuando como un proxy. De esta forma traduce la información de direción de los mensajes entrantes y salientes reenviandolos a su destino.
+- **Proteger los servidores y aplicaciones de ataques** y uso indebido controlando el flujo de información. Sin el cortafuegos, todos los servidores de la red serían accesibles para cualquier usuario.
+
+La implementación y configuración del cortafuegos es compleja, pero aporta **beneficios**:
+
+- Oculta los servidores finales a otras redes.
+- Protege los servidores de múltiples ataques.
+- Oculta información de los servidores a otras redes (evitamos escaneo de puertos).
+- Avisa de posibles ataques.
+
+Construir el **conjunto de reglas** de la siguiente forma:
+
+- Crear grupos de reglas para conjuntos de servidores que deben responder a diferente tipo de tráfico.
+- **Por defecto**, establecer reglas para **denegar el tráfico** que no esté permitido explícitamente.
+- **Permitir el tráfico en el sentido necesario** (un servidor web no necesita navegar por Internet).
+
+**Recomendaciones**:
+
+- Configurar el cortafuegos completamente independiente del resto de recursos.
+- La máquina cortafuegos no debe ejecutar otro software salvo el del cortafuegos.
+- Eliminar cualquier servicio accesorio en el cortafuegos.
+- Blindar el cortafuegos para que no acepte conexiones directas a él (se comporte como un paso más en el camino y el atacante no se de cuenta de que está ahí).
+- No registrar la IP del cortafuegos en ningún servicio de DNS, ya que su IP no es necesaria para que los clientes accedan a la granja web.
+- No permitir acceso desde Internet para administrar el cortafuegos, ya que un hacker podría conseguir acceso al mismo -> VPN.
+
+#### 5.1 Configurar el cortafuegos con iptables
+
+Configurar el cortafuegos con iptables (Proteger un servidor un servidor web).
+
+![](./img/t5/2.png)
+
+![](./img/t5/3.png)
+
+**Configurar el cortafuegos con iptables (ejemplos)**:
+
+Examinar las reglas configuradas en este momento:
+
+```
+iptables -L -n –v
+```
+
+Guardar/restaurar las reglas configuradas en este momento:
+
+```
+iptables-save > ~/reglas.iptables
+iptables-restore < ~/reglas.iptables
+```
+
+Evitar el acceso a www.facebook.com:
+
+```
+iptables -A OUTPUT -p tcp -d 69.171.224.0/19 -j DROP
+```
+
+También se puede usar el nombre de dominio:
+
+```
+iptables -A OUTPUT -p tcp -d www.facebook.com -j DROP
+iptables -A OUTPUT -p tcp -d facebook.com -j DROP
+```
+
+**Configurar el cortafuegos con ufw**:
+
+Para hacer una configuración lo más segura posible, dejando acceso a SSH, HTTP, HTTPS:
+
+```
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw enable
+ufw allow http
+ufw allow https
+ufw status verbose
+```
+
+Para comprobar la configuración de la red, podemos usar netstat, lsof, nc, nmap:
+
+```
+netstat -natopu
+lsof -i -P -n
+nc -vn -w 1 105.21.19.6 22
+nmap 105.21.19.6
+nmap -O 105.21.19.6
+nmap -sL 105.21.19.0/24
+```
+
+**Configurar el cortafuegos con iptables (ejemplos)**:
+
+Con la siguiente orden, comprobaremos qué puertos hay abiertos y cuáles cerrados:
+
+```
+netstat –tulpn
+```
+
+Para asegurarnos del estado del puerto 80 (abierto/cerrado), ejecutar:
+
+```
+netstat -tulpn | grep :80
+```
+
+Para ver las conexiones abiertas en el puerto 80 ejecutar:
+
+```
+netstat -an | grep :80 | sort
+netstat | grep http | wc -l
+```
+
+Comprobación del funcionamiento del cortafuegos:
+
+![](./img/t5/5.png)
+
+![](./img/t5/6.png)
+
+### 6. Evitar ataques
+
+El **balanceador** de carga puede evitar cierto tipo de ataques:
+
+- Denegación de servicio.
+- TCP SYN.
+- ping of death.
+- Teardrop.
+- Smurf.
+- IP spoofing.
+- Phishing.
+
+#### 6.1 Denegación de servicio
+
+- Denegación de servicio por saturación.
+- Denegación de servicio por explotación de vulnerabilidades.
+
+Los ataques por denegación de servicio envían paquetes IP o datos de tamaños o formatos raros que saturan los equipos de destino o los vuelven inestables.
+
+DDoS, Distributes Denial of Service: sistema distribuido de denegación de servicio (participan varios equipos en la denegación de servicio).
+
+#### 6.2 TCP SYN o SYN flood (denegación de servicio)
+
+Saturar el tráfico de la red aprovechando el mecanismo de negociación de tres vías del protocolo TCP.
+
+![](./img/t5/7.png)
+
+![](./img/t5/8.png)
+
+Aprovecha el mecanismo de negociación de tres vías del protocolo TCP: Se envía una gra cantidad de solicitudes SYN a través de un orenador con una dirección IP inexistente o no válida, de forma que el equipo atacado no puede recibir un paquete ACK. Así, quedarán las conexiones abiertas en cola en la estructura de memoria esperando la recepción de un paquete ACK.
+
+#### 6.3 Ping de la muerte (ping of death)
+
+El principio de este ataque consiste simplemente en crear un datagrama IP cuyo tamaño total supere el máximo autorizado (65 536 bytes). Cuando un paquete con estas características se envía a un sistema que contiene una pila vulnerables de protocolos TCP/IP, este produce la caída del sistema.
+
+Los sistemas actuales ya no son vulnerables a este ataque.
+
+#### 6.4 Ataque por fragmentación (teardrop)
+
+Se aprovecha del protocolo para fragmentar paquetes grandes en varios paquetes IP más pequeños. Cada uno de ellos tiene un número de secuencia y un número de identificación común para ensamblarlos.
+
+El ataque se basa en introducir información falsa en los paquetes fragmentados para que queden fragmentos vacíos o superpuestos que pueden desestabilizar el sistema.
+
+Los sistemas actuales ya no son vulnerables a esto.
+
+#### 6.5 Ataque pitufo (Smurf)
+
+Se basa en el uso de servidores de difusión (capacidad de duplicar un mensaje y enviarlo a todos los equipos de una misma red).
+
+El equipo atacante envía una solicitud de ping a varios servidores de difusión falsificando las direcciones IP de origen y proporciona la dirección IP de un equipo destino (atacado). El servidor transmite la solicitud a toda la red. Todos los equipos de la red envían una respuesta al servidor de difusión, que redirecciona las respuestas al equipo de destino.
+
+#### 6.6 IP spoofing
+
+Consiste en crear paquetes con la IP de origen falsa.
+
+Así se consigue que las respuestas que genere el equipo de destino vayan a otro equipo (el objetivo del ataque).
+
+![](./img/t5/9.png)
+
+#### 6.7 Suplantación de identidad (Phishing)
+
+Es una técnica de "ingeniería social", lo que significa que no aprovecha una vulnerabilidad en los ordenadores sino un "fallo humano" al engañar a los usuarios de Internet con un correo electrónico que aparentemente proviene de una empresa fiable, cmúnmente de una página web bancaria o corporativa.
+
+#### 6.8 Código C de un ataque
+
+![](./img/t5/10.png)
+
+#### 6.9 Evitar otros tipos de ataques
+
+El balanceador puede mantener **listas negras**.
+
+Limitar o denegar completamente el acceso a listas de IP **monitorizando el origen, estino o puerto** edl tráfico.
+
+Se pueden incluir **rangos completos de IP**.
+
+Se pueden evitar ataqyes de sitios concretos, actuando como sistema adicional de detección de intrusos.
+
+Posibilidad de **crear listas de control de acceso** (access control list, ACL) y realizar filtrado a partir de ellas.
+
+Definir aplicaciones (servicios o puertos) a los que puede acceder un grupo. El administrador de red puede permitir o denegar el acceos a ciertas funcionalidades (aplicaciones) a rangos de IP-
+
+El balanceador solo **complementa/ayuda al cortafuegos**, ya que tiene capacidad limitar para bloquear o filtrar.
+
+### 7. Prácticas de seguridad recomendadas
+
+#### 7.1 Copias de seguridad
+
+Tener un sistema de **copias de seguridad automatizado** es indispensable para asegurar la disponibilidad de los datos en nuestro sistema.
+
+El software de copia de seguridad debe verificar los datos una vez grabados.
+
+Las copias de seguridad deben guardarse en un lugar seguro, en un local diferente al que alberga los servidores.
+
+#### 7.2 Imágenes de los servidores
+
+También conviene disponer de **imágenes de instalación** de los propios sistemas.
+
+Podremos restaurar una máquina rápida y fácilmente.
+
+**Opciones**: desde usar el comando **dd** de Linux hasta usar software propietario como **Intelligent Disaster Recovery** (Veritad Backup-Exec) o **Take Two**.
+
+### 8. COnclusiones
+
+- El **éxito** de un sitio web depende de su **seguridad**.
+- La seguridad no se puede pasar por alto.
+- **Aspecto crítico** en un sistema web para mantener a salvo de ataques los recursos de la empresa.
+- Hay que establecer unas **políticas de seguridad** y **mantenerse al día** de vulnerabilidades de software, de posibles ataques, de actualizaciones de software, etc.
+- La **defensa en profundidad** implica mantener diferentes capas de seguridad, independientes entre ellas, de forma que si un atacante consigue pasar una, tendrá otra que superar. Así se dificulta en gran medida la consecución final de un ataque.
+- Se diseñarán **diferentes tipos de acceso** y se configurará el sistema para facilitar esos accesos exclusivamente denegando cualquier otro.
+
+
+
+
