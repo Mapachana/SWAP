@@ -236,9 +236,90 @@ En este caso, como gobetween no es un servicio, no hace falta desactivar que se 
 
 ## Zevenet
 
-Para configurar Zevenet, vamos a instalar una iso, que descargamos de https://es.zevenet.com/productos/comunidad/#repository.
+Para configurar Zevenet, vamos a instalar una iso, que descargamos de https://es.zevenet.com/productos/comunidad/#repository .
+
+Comenzamos creando una nueva máquina virtual, de nuevo con 1GB de RAM, 10GB de disco duro dinámico y añadimos el adaptador de red solo-anfitrión antes de iniciar la máquina, de modo que detecte tanto el adaptador NAT como el solo-anfitrión automáticamente.
+
+Al instalarlo, lo hacemos en español de España seleccionando el teclado español.
+
+![](./img/zev_1.png)
+
+Seleccionamos el segundo adaptador de red:
+
+![](./img/zev_2.png)
+
+Y añadimos la IP de la máquina:
+
+![](./img/zev_3.png)
+
+Dejamos la netmask y gateway por defecto, así como el nameserver.
+
+Como hostname uso mi usuario de la ugr:
+
+![](./img/zev_4.png)
+
+Y dejo el domain name en blanco. Como contraseña uso Swap1234:
+
+![](./img/zev_5.png)
+
+Elegimos la hora de la península y luego elegimos instalación guiada utilizando todo el disco.
+
+![](./img/zev_6.png)
+
+Dejamos todo por defecto y la configuración con todas las particiones juntas.
+
+![](./img/zev_7.png)
+
+Instalamos el grub en las particiones y completamos la instalación.
+
+![](./img/zev_8.png)
+
+Y comprobamos que funciona
+
+![](./img/zev_9.png)
+
+Accedemos ahora a la dirección 192.168.56.104 por el puerto 444, donde nos identificamos con el usuario y contraseña establecida:
+
+![](./img/zev_11.png)
+
+Y así llegamos al dashboard
+
+![](./img/zev_12.png)
+
+En Network->NIC comprobamos y configuramos las redes para que quede así:
+
+![](./img/zev_13.png)
+
+Ahora en LSLB-> Farms creamos una nueva granja de red como sigue:
+
+![](./img/zev_14.png)
+
+![](./img/zev_15.png)
 
 
+Si le damos a editar podemos ver las opciones avanzadas:
+
+![](./img/zev_16.png)
+
+Finalmente añadimos el servicio "swap" con los backends m1 y m2:
+
+![](./img/zev_17.png)
+
+Y comprobamos que funciona:
+
+![](./img/zev_18.png)
+
+### Opciones avanzadas
+
+Como opciones avanzadas podemos configurar el timeout de los backend de forma independiente, como ya hemos visto, así como asignar pesos:
+
+![](./img/zev_19.png)
+
+Al hacer los cambios le damos al botón de restart de la granja y comprobamos que ya funciona.
+
+También se puede configurar la persistencia por sesiones durante un tiempo máximo y comprobaciones del estado de los backend:
+
+![](./img/zev_20.png)
 
 ## Pound
 
