@@ -377,9 +377,40 @@ Y relanzando comprobamos que siempre nos atiende la misma máquina.
 Finalmente, y como con nginx y haproxy, se desactiva que se lance al inicio para evitar problemas por usar todos los servicios el mismo puerto con `sudo systemctl disable pound`.
 
 
+## Someter la granja web a una carga
 
+Comenzamos instalando apache benchmark en la máquina anfitriona con el comando `sudo apt-get install -y apache2-utils`:
 
+![](./bench_1.png)
 
+Ahora, lanzamos nginx y lo configuramos con roundrobin, como antes.
+
+Lanzamos el benchmark, con 10000 peticiones con concurrencia 10:
+
+`ab -n 10000 -c 10 http://192.168.56.103/index.html`
+
+Obtenemos la siguiente información:
+
+![](./img/bench_2.png)
+
+![](./img/bench_3.png)
+
+Donde lo mas relevante son las peticiones por segundo, que es lo que vamos a comparar.
+
+Lanzamos este mismo benchmark a todos los servidores, con round-robin y ponderación, considerando que m1 tiene el doble de capacidad que m2.
+
+|  Balanceador    |   Modo          |  Peticiones/s    |  Longest request (ms)  |
+| --------------- | --------------- | ---------------- | ----------------- |
+|  nginx          |  round-robin    |   1101.41        |  29   |
+|  nginx          |  ponderación    |   1035.80        |  46   |
+|  haproxy        |  round-robin    |   1018.19        |  31   |
+|  haproxy        |  ponderación    |   1001.13        |  42   |
+|  gobetween      |  round-robin    |    853.46        |  39   |
+|  gobetween      |  ponderación    |    857.36        |  44   |
+|  zevenet        |  round-robin    |    933.23        |  42   |
+|  zevenet        |  ponderación    |    967.92        |  51   |
+|  pound          |  round-robin    |    742.90        |  132  |
+|  pound          |  ponderación    |    733.41        |  121  |
 
 
 
