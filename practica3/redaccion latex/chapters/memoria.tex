@@ -1,321 +1,666 @@
 
+\chapter{Instalación}
 
-
-\chapter{nginx}
-
-Vamos a comenzar enviando el directorio con \verb|tar|, de forma simple. Comenzamos creando un directorio con un archivo como se ve en \eqref{enviar_1}.
+Comenzamos instalando la máquina virtual como las anteriores, rellenando los datos relativos a la m3, como se muestra en \eqref{instal_1}.
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Creación de directorio con un archivo en m1 y contenido de este archivo.}
-\label{enviar_1}
-\includegraphics[scale=0.5]{enviar_1}
-\includegraphics[scale=0.5]{enviar_2}
+\caption{Instalación de m3}
+\label{instal_1}
+\includegraphics[scale=0.5]{instal_1}
 \end{center}
 \end{figure}
 
-Y mandamos el directorio comprimido con tar \eqref{enviar_3}. Como ya configuramos el acceso por ssh sin contraseña no nos la pide.
+Añadimos el adaptador de red solo-anfitrión y configuramos la red editando el fichero \verb|/etc/netplan/00-installer-config.yaml| asignando la ip 192.168.56.103, \eqref{instal_3}.
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Envío del archivo comprimido con tar}
-\label{enviar_3}
-\includegraphics[scale=0.5]{enviar_3}
+\caption{Configuración de la red de m3, fichero /etc/netplan/00-installer-config.yaml.}
+\label{instal_3}
+\includegraphics[scale=0.5]{instal_3}
 \end{center}
 \end{figure}
 
-Finalmente descomprimimos y comprobamos que se ha mandado correctamente \eqref{enviar_4}.
+Finalmente ejecutamos \verb|sudo netplan apply| para hacer efectivos los cambios.
 
-\begin{figure}[h!]
-\begin{center}
-\caption{Descompresión y comprobación del envío correcto del archivo.}
-\label{enviar_4}
-\includegraphics[scale=0.5]{enviar_4}
-\end{center}
-\end{figure}
+\chapter{Nginx}
 
-\section{Envío mediante tar y scp}
-
-Ahora vamos a enviarlo mediante tar y scp. Para ello creamos el tar y lo mandamos mediante scp como se ve en \eqref{enviar_6}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Compresión con tar y envío mediante scp}
-\label{enviar_6}
-\includegraphics[scale=0.5]{enviar_4}
-\end{center}
-\end{figure}
-
-Comprobamos en \eqref{enviar_7} que en la máquina 2 se encuentra directorio2.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Comprobación de la llegada de directorio2 a m2}
-\label{enviar_7}
-\includegraphics[scale=0.5]{enviar_7}
-\end{center}
-\end{figure}
-
-\section{Comandos avanzados}
-
-Vamos a enviar el directorio esta vez usando scp y algunas de sus opciones.
-
-Comenzamos son \verb|-r|, que copia recursivamente directorios enteros, y \verb|-v| nos da información de la copia y de ssh. Como vemos en \eqref{enviar_8} muestra mucha información.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Uso de scp con comandos avanzados}
-\label{enviar_8}
-\includegraphics[scale=0.5]{enviar_8}
-\includegraphics[scale=0.5]{enviar_9}
-\end{center}
-\end{figure}
-
-También podemos usar la opción \verb|-q| que desactiva que se muestren mensajes por si se mandan muchos archivos \eqref{enviar_11}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Uso de scp con comandos avanzados}
-\label{enviar_11}
-\includegraphics[scale=0.5]{enviar_11}
-\end{center}
-\end{figure}
-
-Finalmente, con \verb|-P| podemos indicar el puerto. Por ejemplo de m2 a m1 como se muestra en \eqref{enviar_13}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Uso de scp con comandos avanzados}
-\label{enviar_13}
-\includegraphics[scale=0.5]{enviar_13}
-\end{center}
-\end{figure}
-
-
-\chapter{Utilizando Rsync}
-
-Rsync ya está instalado en ambas máquinas, comprobamos su versión en \eqref{rsync_1}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Comprobación de la versión de Rsync.}
-\label{rsync_1}
-\includegraphics[scale=0.5]{rsync_1}
-\end{center}
-\end{figure}
-
-Con chown cambiamos el propietario de la carpeta \verb|/var/www/| ejecutando el comando \eqref{rsync_2}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Cambiamos el propietario de la carpeta /var/www/}
-\label{rsync_2}
-\includegraphics[scale=0.5]{rsync_2}
-\end{center}
-\end{figure}
-
-Y ejecutamos rsync en m1, para copiar los archivos a m2, como se muestra en \eqref{rsync_4}:
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Sincronización de la carpeta /var/www/ de m1 a m2}
-\label{rsync_4}
-\includegraphics[scale=0.5]{rsync_4}
-\end{center}
-\end{figure}
-
-Las opciones usadas son \verb|-a|, que indica recursividad (archive), \verb|-e| especifica el shell remoto que se va a utilizar, \verb|-v| es verbose, para dar más información y \verb|-z| para comprimir los archivos durante la trasnferencia.
-
-\section{Opciones avanzadas}
-
-Como opciones avanzadas vamos a usar \verb|--stats|, que nos muestra estadísticas, \verb|--exclude|, para excluir carpetas o directorios, \verb|--delete|, para borrar en la máquina destino los ficheros borrados de la máquina origen y \verb|--dry-run|, que permite a rsync hacer un clonado de prueba, de forma que podemos ver lo que se va a clonar pero sin llegar a efectuarse la copia.
-
-Comenzamos creando un directorio de prueba a clonar desde m1 a m2 \eqref{rsync_a1}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Creamos directorio de prueba para clonar usando rsync.}
-\label{rsync_a1}
-\includegraphics[scale=0.5]{rsync_a1}
-\end{center}
-\end{figure}
-
-Comenzamos realizando una prueba de lo que sería la copia con \verb|--dry-run|, como mostramos en \eqref{rsync_a2}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Ejecución de rsync don --dry-run}
-\label{rsync_a2}
-\includegraphics[scale=0.5]{rsync_a2}
-\end{center}
-\end{figure}
-
-Así, comprobamos que en efecto se va a mandar lo que queremos, pero todavía no hemos clonado nada, como podemos comprobar en la máquina m2, se puede ver en \eqref{rsync_a3}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Estado de m2 tras la ejecución de rsync con --dry-run}
-\label{rsync_a3}
-\includegraphics[scale=0.5]{rsync_a3}
-\end{center}
-\end{figure}
-
-Ahora sí, procedemos a realizar el envío quitando la opción \verb|--dry-run|, en \eqref{rsync_a4}, y comprobamos que se ha copiado con éxito en \eqref{rsync_a5}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Ejecución de rsync con opciones avanzadas.}
-\label{rsync_a4}
-\includegraphics[scale=0.5]{rsync_a4}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Comprobando la copia correcta de los ficheros en m2.}
-\label{rsync_a5}
-\includegraphics[scale=0.5]{rsync_a5}
-\end{center}
-\end{figure}
-
-Es claro que el argumento \verb|--exclude| ha evitado que se copie el directorio \verb|nomandar|.
-
-Finalmente, probamos a eliminar el fichero \verb|fichero1.txt| y repetir el clonado, comprobando así que la opción \verb|--delete| lo elimina en m2 también, como se ve en \eqref{rsync_a6}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Ejecución de rsync tras borrar fichero1 en m1 y el resultado en m2}
-\label{rsync_a6}
-\includegraphics[scale=0.5]{rsync_a6}
-\includegraphics[scale=0.5]{rsync_a7}
-\end{center}
-\end{figure}
-
-\chapter{Acceso mediante ssh sin contraseña}
-
-El acceso por ssh sin introducir la contraseña manualmente ya se configuró en la práctica anterior.
-
-Para ello, generamos en cada máquina una clave pública y privada, con \verb|ssh-keygen|, como se muestra en \eqref{ssh_1}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Generación de claves con ssh-keygen}
-\label{ssh_1}
-\includegraphics[scale=0.5]{ssh_1}
-\end{center}
-\end{figure}
-
-Después compartimos las claves públicas de una máquina a otra con 
-
-\verb|ssh-copy-id -p 2022 anabuenrua@192.168.56.101| (de m2 a m1) y
-
-\verb|ssh-copy-id anabuenrua@192.168.56.102| (de m1 a m2). El caso de m2 a m1 puede verse en \eqref{ssh_2}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Envío de claves públicas mediante ssh-sopy-id}
-\label{ssh_2}
-\includegraphics[scale=0.5]{ssh_2}
-\end{center}
-\end{figure}
-
-\section{Opciones avanzadas}
-
-Cuando se realizó, se dejaron todas las opciones por defecto, pero se pueden usar algunos argumentos para modificar el comportamiento:
-
-\begin{itemize}
-\item \verb|-t|: Especifica el tipo de clave que se va a generar, por ejemplo rsa.
-\item \verb|-b|: Indica el número de bits en la clave, por defecto es 2048.
-\item \verb|-f|: Especifica el archivo de la clave.
-\item \verb|-l|: No se usa al generar las claves, si no que se usa para ver el fingerprint de una clave pública.
-\item \verb|-v|: Verbose.
-\end{itemize}
-
-Ejemplos de uso de estos argumentos son \verb|ssh-keygen -t rsa -b 4096| o \eqref{ssh_3}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Opciones avanzadas de ssh-keygen}
-\label{ssh_3}
-\includegraphics[scale=0.5]{ssh_3}
-\end{center}
-\end{figure}
-
-Si al generar la clave no usamos la ruta por defecto, para mandarla con \verb|ssh-copy-id| debemos especificar la ruta de la clave pública con \verb|-i|, al igual que al acceder se especifica la de la clave privada con \verb|-i| en \verb|ssh|.
-
-\section{Copia de clave manual}
-
-Comenzamos en m2, accediendo a \verb|~/.ssh/authorized_keys|, donde está escrita la clave pública de \verb|m1|. Editamos este fichero con nano borrando su contenido y comprobamos que ahora para acceder a m2 desde m1 nos pide contraseña, \eqref{ssh_5}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Comprobación de que nos requiere contraseña para conectar mediante ssh tras borrar la clave previamente guardada.}
-\label{ssh_5}
-\includegraphics[scale=0.5]{ssh_5}
-\end{center}
-\end{figure}
-
-Para volver a tener acceso sin contraseña, vamos a mandar nuestra clave pública a m2. Para ello copiamos la clave pública que se encuentra en \verb|~/.ssh/id_rsa.pub| de m1 mediante \verb|scp| en el archivo \verb|~/.ssh/authorized_keys| de m2, como vemos en \eqref{ssh_6}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Visualización y envío de la clave pública mediante scp y comprobación en la máquina m2 de que se ha realizado correctamente.}
-\label{ssh_6}
-\includegraphics[scale=0.5]{ssh_6}
-\includegraphics[scale=0.5]{ssh_7}
-\end{center}
-\end{figure}
-
-Finalmente comprobamos que nos podemos conectar de m1 a m2 sin contraseña de nuevo conectándonos por ssh como en \eqref{ssh_8}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Conexión por ssh sin requerir introducir la contraseña.}
-\label{ssh_8}
-\includegraphics[scale=0.5]{ssh_8}
-\end{center}
-\end{figure}
-
-\chapter{Usando crontab}
-
-Comenzamos añadiendo una tarea que sincronice completamente las carpetas \verb|/var/www/| de m1 y de m2 cada hora.
-
-Para conseguirlo, usamos crontab para programar la ejecución del comando de \verb|rsync| cada hora, editando el fichero \verb|/etc/crontab| como sigue en \eqref{crontab_1}.
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Configuración del fichero /etc/crontab para programar la sincronización con rsync cada hora.}
-\label{crontab_1}
-\includegraphics[scale=0.5]{crontab_1}
-\end{center}
-\end{figure}
-
-\section{Opciones avanzadas}
-
-Como opciones avanzadas, tenemos que mientras \verb|'*'| es para cualquier valor y se pueden especificar varios valores concretos separados por \verb|','|, hay formas más fáciles de especificar cuándo ejecutar ciertas tareas.
-
-Por ejemplo, \verb|'-'| indica un rango, y \verb|'/'| el paso o salto. Así, si añadimos la siguiente tarea para escribir 'hola' en un fichero \verb|cronprueba.log| cada 2 horas los días 1,2 y 3 (de 1 a 3) sería editando el fichero \verb|/etc/crontab| como se ve en \eqref{crontab_2}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Configuración del fichero /etc/crontab para escribir hola en un fichero los días 1,2 y 3 cada 2 horas.}
-\label{crontab_2}
-\includegraphics[scale=0.5]{crontab_2}
-\end{center}
-\end{figure}
+Comenzamos instalando nginx, para ello ejecutamos:
 
 \begin{verbatim}
-00 0-23/2 1-3 * * root echo "hola" >> cronprueba.log
+sudo apt-get update && sudo apt-get dist-upgrade
+&& sudo apt-get autoremove
+sudo apt-get install nginx
 \end{verbatim}
 
-Vemos que hemos especificado los minutos a 00 y en las de horas de 0 a 23 cada 2, en los días 1 a 3.
+Lanzamos nginx con \verb|sudo systemctl start nginx|, y comprobamos que está activo, puede verse en \eqref{nginx_4}.
 
+\begin{figure}[h!]
+\begin{center}
+\caption{Lanzamiento y comprobación del estado de nginx.}
+\label{nginx_4}
+\includegraphics[scale=0.5]{nginx_4}
+\end{center}
+\end{figure}
 
+Ahora deshabilitamos el servidor web para que nginx actúe como balanceador, para lo que vamos a editar el fichero \verb|/etc/nginx/nginx.conf|, dejándolo como en \eqref{nginx_5}:
 
+\begin{figure}[h!]
+\begin{center}
+\caption{Deshabilitamos el servidor web modificando el fichero de configuración /etc/nginx/nginx.conf.}
+\label{nginx_5}
+\includegraphics[scale=0.5]{nginx_5}
+\end{center}
+\end{figure}
 
+Y ahora modificamos el archivo \verb|/etc/nginx/conf.d/default.conf| como se ve en \eqref{nginx_6}.
 
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/nginx/conf.d/default.conf .}
+\label{nginx_6}
+\includegraphics[scale=0.5]{nginx_6}
+\end{center}
+\end{figure}
 
+Y reiniciamos el servicio con \verb|sudo systemctl restart nginx| para asegurarnos de que se aplica la configuración.
 
+Comprobamos ahora accediendo a \verb|http://192.168.56.103/swap.html| en el navegador o mediante curl (como en \eqref{nginx_9} que las máquinas se turnan para servir el sitio web.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comprobación del funcionamiento de la configuración de nginx con roundrobin.}
+\label{nginx_9}
+\includegraphics[scale=0.5]{nginx_9}
+\end{center}
+\end{figure}
+
+\section{Ponderación}
+
+Ahora vamos a repartir la carga entre las máquinas en función de pesos. Para ello, en \verb|/etc/nginx/conf.d/default.conf| vamos a usar el parámetro \verb|weight|.
+
+Como ejemplo, vamos a suponer que m1 tiene el doble de capacidad que m2.
+
+Editamos el fichero \verb|/etc/nginx/conf.d/default.conf| como en \eqref{nginx_10}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/nginx/conf.d/default.conf para ponderación.}
+\label{nginx_10}
+\includegraphics[scale=0.5]{nginx_10}
+\end{center}
+\end{figure}
+
+Relanzamos nginx con \verb|sudo systemctl restart nginx| y comprobamos que funciona:
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comprobación del funcionamiento de la configuración de nginx con ponderación.}
+\label{nginx_11}
+\includegraphics[scale=0.5]{nginx_11}
+\end{center}
+\end{figure}
+
+\section{Otras opciones avanzadas}
+
+Ahora vamos a configurar que todas las peticiones que vengan de la misma IP se dirijan a la misma máquina servidora final. Para ello, usamos \verb|ip\_hash| en el fichero de configuración, como en \eqref{nginx_12}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/nginx/conf.d/default.conf con ip\_hash.}
+\label{nginx_12}
+\includegraphics[scale=0.5]{nginx_12a}
+\end{center}
+\end{figure}
+
+De nuevo, reiniciamos el servicio para hacer efectiva la configuración y comprobamos que funciona en \eqref{nginx_13}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comprobación del funcionamiento de la configuración de nginx con ip\_hash.}
+\label{nginx_13}
+\includegraphics[scale=0.5]{nginx_13}
+\end{center}
+\end{figure}
+
+También podemos activar las conexiones \verb|keepalive| por 3 segundos, ilustrado en \eqref{nginx_14}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/nginx/conf.d/default.conf con keepalive.}
+\label{nginx_14}
+\includegraphics[scale=0.5]{nginx_14a}
+\end{center}
+\end{figure}
+
+Otra opción es usar \verb|down|, que marca un servidor como permanentemente offline, y requiere de ser usado con \verb|ip\_hash|, como se ve es \eqref{nginx_15}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/nginx/conf.d/default.conf con down.}
+\label{nginx_15}
+\includegraphics[scale=0.5]{nginx_15a}
+\end{center}
+\end{figure}
+
+Relanzamos el servicio y comprobamos que funciona en \eqref{nginx_16}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comprobación del funcionamiento de la configuración de nginx con down.}
+\label{nginx_16}
+\includegraphics[scale=0.5]{nginx_16}
+\end{center}
+\end{figure}
+
+También podemos usar \verb|backup|, que reserva este servidor y solo le pasa tráfico si alguno de los otros servidores no configurados como backup está caído u ocupado, como se muestra en \eqref{nginx_17}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/nginx/conf.d/default.conf con backup.}
+\label{nginx_17}
+\includegraphics[scale=0.5]{nginx_17a}
+\end{center}
+\end{figure}
+
+Y ahora siempre nos atiende m1.
+
+Finalmente, para evitar errores al reiniciar la máquina virtual, se va a deshabilitar que se lance nginx al encender la máquina. Para ello se ejecuta \verb|sudo systemctl disable nginx|.
+
+\chapter{HAProxy}
+
+Comenzamos parando nginx, de forma que no interfiera con HAProxy, ya que usan el mismo puerto. Para pararlo, ejecutamos \verb|sudo systemctl stop nginx|.
+
+Ahora instalamos HAproxy con \verb|sudo apt-get install haproxy|.
+
+Lanzamos HAProxy con \verb|sudo systemctl start haproxy| y comprobamos su estado, como se muestra en \eqref{haproxy_2}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Lanzamiento y comprobación del estado de haproxy.}
+\label{haproxy_2}
+\includegraphics[scale=0.5]{haproxy_2}
+\end{center}
+\end{figure}
+
+Editamos ahora el archivo de configuración \verb|/etc/haproxy/haproxy.cfg| como en \eqref{haproxy_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/haproxy/haproxy.cfg .}
+\label{haproxy_3}
+\includegraphics[scale=0.5]{haproxy_4}
+\includegraphics[scale=0.5]{haproxy_3}
+\end{center}
+\end{figure}
+
+Y relanzamos el servicio con \verb|sudo systemctl restart haproxy|.
+
+Comprobamos que funciona, va sirviendo por turnos cada máquina, al igual que lo hacía nginx.
+
+\section{Ponderación}
+
+Para configurar la ponderación, de nuevo editamos el fichero \verb|/etc/haproxy/haproxy.cfg|, usando la opción weight. De nuevo se ha supuesto a m1 con el doble de capacidad de m2, como se ve en \eqref{haproxy_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/haproxy/haproxy.cfg para ponderación.}
+\label{haproxy_5}
+\includegraphics[scale=0.5]{haproxy_5}
+\end{center}
+\end{figure}
+
+Y relanzamos el servicio y comprobamos que funciona, de nuevo m1 sirve 2 de cada 3 peticiones que realizamos.
+
+\section{Opciones avanzadas}
+
+Por analogía y para que sirva de comparativa con cómo se realizan algunas configuraciones en nginx, se van a usar configuraciones ya usadas antes.
+
+Por ejemplo, para usar ip hash, editando de nuevo el archivo de configuración como en \eqref{haproxy_7}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/haproxy/haproxy.cfg para ip\_hash.}
+\label{haproxy_7}
+\includegraphics[scale=0.5]{haproxy_7a}
+\end{center}
+\end{figure}
+
+Y si relanzamos y comprobamos que funciona, pues siempre nos atiende m1.
+
+Finalmente, también podemos poner de nuevo m2 en backup, como se muestra en \eqref{haproxy_9}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/haproxy/haproxy.cfg con backup.}
+\label{haproxy_9}
+\includegraphics[scale=0.5]{haproxy_9}
+\end{center}
+\end{figure}
+
+Y relanzando comprobamos que funciona, ya que siempre nos atiende m1.
+
+Finalmente, para evitar errores al reiniciar la máquina virtual, se va a deshabilitar que se lance HAProxy al encender la máquina. Para ello se ejecuta \verb|sudo systemctl disable haproxy|.
+
+\chapter{Estadísticas de HAProxy}
+
+Para esta sección dejamos round-robin, como en la configuración inicial, y añadimos configuración necesaria para habilitar las estadísticas en \verb|/etc/haproxy/haproxy.cfg|, como se ve en \eqref{estad_1}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/haproxy/haproxy.cfg para habilitar estadísicas.}
+\label{estad_1}
+\includegraphics[scale=0.5]{estad_1}
+\end{center}
+\end{figure}
+
+Relanzamos haproxy y accedemos a las estadísticas, para lo que introducimos el usuario y contraseña antes de acceder, como puede verse en \eqref{estad_2}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Accediendo a las estadísticas de HAProxy a través del navegador}
+\label{estad_2}
+\includegraphics[scale=0.5]{estad_2}
+\includegraphics[scale=0.35]{estad_3}
+\end{center}
+\end{figure}
+
+\section{Opciones avanzadas}
+
+Como opciones avanzadas se va a añadir el tiempo de refresco de la página y la posibilidad de marcar los servidores como down o maintenance.
+
+Por ejemplo, vamos a usar un tiempo de refresco de 30 segundos.
+
+Para ello, editamos de nuevo el fichero de configuración añadiendo las líneas:
+
+\begin{verbatim}
+stats refresh 30s
+stats admin if TRUE
+\end{verbatim}
+
+Luego el fichero quedaría como \eqref{estad_4}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/haproxy/haproxy.cfg con opciones avanzadas de las estadísticas.}
+\label{estad_4}
+\includegraphics[scale=0.5]{estad_4}
+\end{center}
+\end{figure}
+
+Y relanzando de nuevo el servicio y accediendo a las estadísticas observamos los cambios en \eqref{estad_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Estadísticas de haproxy con opciones avanzadas.}
+\label{estad_5}
+\includegraphics[scale=0.35]{estad_5}
+\end{center}
+\end{figure}
+
+Si además se quisiera configurar el timeout, se usaría \verb|stats timeout <n>s|.
+
+\chapter{Gobetween}
+
+Comenzamos asegurandonos de que tanto nginx como haproxy no se estén ejecutando, y tras esto instalamos gobetween mediante snap ejecutando:
+
+\begin{verbatim}
+sudo snap install gobetween --edge
+\end{verbatim}
+
+Ahora, vamos a configurar gobetween, para ello nos basamos en el archivo de configuración de \verb|/snap/gobetween/current/config/gobetween.toml|, y creamos el fichero de configuración \verb|/snap/gobetween/gobetween_config.toml| quedando como \eqref{gobet_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /snap/gobetween/gobetween\_config.toml }
+\label{gobet_3}
+\includegraphics[scale=0.5]{gobet_3a}
+\end{center}
+\end{figure}
+
+Hemos dejado los parámetros por defecto que venían (defaults) y las métricas activadas, ya que esta configuración ya venía realizada en la configuración de ejemplo. Las opciones de healthcheck se explicarán en el apartado de opciones avanzadas.
+
+Y ahora lanzamos gobetween con la configuración establecida indicando el fichero. Como vemos en \eqref{gobet_4}, no tenemos permiso de escucha para el puerto 80, y nos lanza un error.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Error al lanzar gobetween por no tener permisos de escucha del puerto 80.}
+\label{gobet_4}
+\includegraphics[scale=0.5]{gobet_4}
+\end{center}
+\end{figure}
+
+Por tanto, ejecutamos gobetween con sudo, de forma que no da problemas, como puede verse en \eqref{gobet_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Lanzamiento de gobetween con sudo.}
+\label{gobet_5}
+\includegraphics[scale=0.5]{gobet_5}
+\end{center}
+\end{figure}
+
+Y comprobamos que funciona, pues las máquinas m1 y m2 responden turnándose.
+
+\section{Opciones avanzadas}
+
+Además de round-robin, se puede usar ip\_hash como se muestra en \eqref{gobet_7}, también menor número de conexiones \eqref{gobet_8} y por ponderación \eqref{gobet_9}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /snap/gobetween/gobetween\_config.toml con ip\_hash}
+\label{gobet_7}
+\includegraphics[scale=0.5]{gobet_7}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /snap/gobetween/gobetween\_config.toml con mínimo número de conexiones}
+\label{gobet_8}
+\includegraphics[scale=0.5]{gobet_8}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /snap/gobetween/gobetween\_config.toml con ponderación}
+\label{gobet_9}
+\includegraphics[scale=0.5]{gobet_9}
+\end{center}
+\end{figure}
+
+Adicionalmente, se ha configurado el último bloque, \verb|healthcheck|, que comprueba el estado de los servidores mediante ping (pues se ha configurado con este método) cada 2 segundos, y debe llegar una respuesta antes de 500ms. Si esta respuesta no llegara, como se ha perdido una respuesta (parámetro fails está a 1), el servidor se considera caído (down), y se marcará de nuevo como operativo cuando llegue una respuesta de un ping (parámetro passes está a 1).
+
+En este caso, como gobetween no es un servicio, no hace falta desactivar que se lance automáticamente al encender la máquina virtual.
+
+\chapter{Zevenet}
+
+Para configurar Zevenet, vamos a instalar una iso, que descargamos de
+
+\href{https://es.zevenet.com/productos/comunidad/}{https://es.zevenet.com/productos/comunidad/}.
+
+Comenzamos creando una nueva máquina virtual, de nuevo con 1GB de RAM, 10GB de disco duro dinámico y añadimos el adaptador de red solo-anfitrión antes de iniciar la máquina, de modo que detecte tanto el adaptador NAT como el solo-anfitrión automáticamente.
+
+Al instalarlo, lo hacemos en español de España seleccionando el teclado español, luego seleccionamos el segundo adaptador de red \eqref{zev_2} e introducimos la IP de la máquina \eqref{zev_3}, en este caso se ha usado 192.168.56.104.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Selección del adaptador de red durante la instalación de Zevenet.}
+\label{zev_2}
+\includegraphics[scale=0.5]{zev_2}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Introducimos la dirección IP durante la instalación de Zevenet}
+\label{zev_3}
+\includegraphics[scale=0.5]{zev_3}
+\end{center}
+\end{figure}
+
+Dejamos la netmask y gateway por defecto, al igual que el nameserver. Como hostname introduzco mi usuario de la ugr y como contraseña establezco Swap1234.
+
+Seleccionamos la instalación guiada usando todo el disco, dejamos las particiones por defecto y tras instalar el grub completamos la instalación.
+
+Finalmente, iniciamos la máquina, como se ve en \eqref{zev_9}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Zevenet tras la instalación.}
+\label{zev_9}
+\includegraphics[scale=0.5]{zev_9}
+\end{center}
+\end{figure}
+
+Accedemos ahora a la dirección 192.168.56.104 por el puerto 444, donde nos identificamos con el usuario y contraseña establecida, como se ve en \eqref{zev_11} y llegamos la dashboard \eqref{zev_12}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Autenticación para acceder al dashboard de Zevenet}
+\label{zev_11}
+\includegraphics[scale=0.25]{zev_11}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Dashboard de Zevenet}
+\label{zev_12}
+\includegraphics[scale=0.25]{zev_12}
+\end{center}
+\end{figure}
+
+Ahora, en Network->NIC comprobamos y configuramos las redes para que quede así como en \eqref{zev_13}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Configuración de las redes de Zevenet}
+\label{zev_13}
+\includegraphics[scale=0.25]{zev_13}
+\end{center}
+\end{figure}
+
+Y en LSLB-> Farms creamos una nueva granja de red como se ve en \eqref{zev_14}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Creación de una granja en Zevenet}
+\label{zev_14}
+\includegraphics[scale=0.25]{zev_14}
+\includegraphics[scale=0.25]{zev_15}
+\end{center}
+\end{figure}
+
+Ahora, dando a editar podemos ver las opciones avanzadas, puede verse en \eqref{zev_16}. 
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Opciones avanzadas de una granja en Zevenet}
+\label{zev_16}
+\includegraphics[scale=0.25]{zev_16}
+\end{center}
+\end{figure}
+
+Y podemos crear un servicio \verb|swap| con m1 y m2 como backends como se muestra en \eqref{zev_17}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Creación del servicio swap en la granja}
+\label{zev_17}
+\includegraphics[scale=0.25]{zev_17}
+\end{center}
+\end{figure}
+
+\section{Opciones avanzadas}
+
+Como opciones avanzadas podemos configurar el timeout de los backend de forma independiente, como ya hemos visto, así como asignar pesos, como se ve en \eqref{zev_19}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Configuración del timeout y asignación de pesos a m1 y m2 en Zevenet.}
+\label{zev_19}
+\includegraphics[scale=0.25]{zev_19}
+\end{center}
+\end{figure}
+
+Al hacer los cambios le damos al botón de restart de la granja y comprobamos que ya funciona.
+
+También se puede configurar la persistencia por sesiones durante un tiempo máximo y comprobaciones del estado de los backend, como se muestra en \eqref{zev_20}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Configuración persistencia de sesiones y comprobaciones del estado de los backend en Zevenet.}
+\label{zev_20}
+\includegraphics[scale=0.25]{zev_20}
+\end{center}
+\end{figure}
+
+\chapter{Pound}
+
+Tras asegurarnos de que ninguno de los otros softwares usados está en marcha, descargamos pound, para ello vamos a ejecutar:
+
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get install pound
+\end{verbatim}
+
+Y comprobamos que está funcionando con \verb|sudo systemctl status pound|.
+
+Vamos a editar el fichero de configuración \verb|/etc/pound/pound.cfg| para que quede como en \eqref{pound_2}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración /etc/pound/pound.cfg .}
+\label{pound_2}
+\includegraphics[scale=0.5]{pound_2}
+\end{center}
+\end{figure}
+
+Y relanzamos el servicio con \verb|sudo systemctl restart pound| y probamos a lanzarlo, pero no funciona, comprobamos el estado con \verb|sudo systemctl status pound| y nos sale un mensaje diciendo que configuremos \verb|startup=1| en \verb|/etc/default/pound|, como se ve en \eqref{pound_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Resultado de comprobar el estado de pound con systemctl status}
+\label{pound_3}
+\includegraphics[scale=0.5]{pound_3}
+\end{center}
+\end{figure}
+
+Editamos `/etc/default/pound` dejándolo como en \eqref{pound_4}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero /etc/default/pound .}
+\label{pound_4}
+\includegraphics[scale=0.5]{pound_4}
+\end{center}
+\end{figure}
+
+Tras esto relanzamos el servicio y comprobamos que ahora sí funciona, y al haber establecido las prioridades con m1 el doble de m2, tenemos que m1 recibe el doble de peticiones que m2.
+
+\section{Opciones avanzadas}
+
+Podemos añadir, por ejemplo, a las directivas globales \verb|TimeOut|, que es el tiempo que se espera una respuesta del backend.
+
+xHTTP define los verbos HTTP que se aceptan.
+
+Además, si usamos Emergency, el servidor solo se usará cuando el resto de servidores fallen:
+
+Editamos el fichero de configuración con estas opciones, como se ve en \eqref{pound_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero /etc/pound/pound.cfg con opciones avanzadas (emergency).}
+\label{pound_5}
+\includegraphics[scale=0.5]{pound_5}
+\includegraphics[scale=0.5]{pound_6}
+\end{center}
+\end{figure}
+
+Relanzamos el servicio y vemos que ahora solo nos atiende m1.
+
+Además, al igual que en los otros sistemas hay algo similar a la ip hash, para que las peticiones de la misma ip las atienda la misma máquina en un margen de tiempo. Esto puede verse en \eqref{pound_7}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero /etc/pound/pound.cfg con opciones avanzadas (session).}
+\label{pound_7}
+\includegraphics[scale=0.5]{pound_7}
+\end{center}
+\end{figure}
+
+Y relanzando comprobamos que siempre nos atiende la misma máquina.
+
+Finalmente, y como con nginx y haproxy, se desactiva que se lance al inicio para evitar problemas por usar todos los servicios el mismo puerto con \verb|sudo systemctl disable pound|.
+
+\chapter{Someter la granja web a una carga}
+
+Comenzamos instalando apache benchmark en la máquina anfitriona con el comando:
+
+\begin{verbatim}
+sudo apt-get install -y apache2-utils
+\end{verbatim}
+
+Ahora, lanzamos nginx y lo configuramos con roundrobin, como antes.
+
+Lanzamos el benchmark, con 10000 peticiones con concurrencia 10:
+
+\begin{verbatim}
+`ab -n 10000 -c 10 http://192.168.56.103/index.html`
+\end{verbatim}
+
+Obtenemos la siguiente información, que puede verse en \eqref{bench_2}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Resultado de someter a carga a una granja web con nginx con 10000 peticiones y 10 de concurrencia.}
+\label{bench_2}
+\includegraphics[scale=0.35]{bench_2}
+\includegraphics[scale=0.5]{bench_3}
+\end{center}
+\end{figure}
+
+Donde lo mas relevante son las peticiones por segundo, que es el criterio principal que vamos a usar para comparar.
+
+También llama la atención cuál ha sido el tiempo más largo para atender a una petición.
+
+Lanzamos este mismo benchmark a todos los servidores, con round-robin y ponderación, considerando que m1 tiene el doble de capacidad que m2.
+
+Ahora, se someterá a la misma carga de 10000 peticiones con 10 de concurrencia a todos los balanceadores configurados, cada uno con round robin y ponderación, con m1 atendiendo el doble de peticiones que m2. Los resultados se muestran en la tabla \eqref{tabla}.
+
+\begin{table}[!ht]
+\caption{Resultados de someter a carga a las granjas con distintos balanceadores y configuraciones de round robin y ponderación}
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+    \hline
+        Balanceador & Modo & Peticiones/s & Longest request (ms) \\ \hline
+        nginx & round-robin & 1101.41 & 29 \\ \hline
+        nginx & ponderación & 1035.80 & 46 \\ \hline
+        haproxy & round-robin & 1018.19 & 31 \\ \hline
+        haproxy & ponderación & 1001.13 & 42 \\ \hline
+        gobetween & round-robin & 853.46 & 39 \\ \hline
+        gobetween & ponderación & 857.36 & 44 \\ \hline
+        zevenet & round-robin & 933.23 & 42 \\ \hline
+        zevenet & ponderación & 967.92 & 51 \\ \hline
+        pound & round-robin & 742.90 & 132 \\ \hline
+        pound & ponderación & 733.41 & 121 \\ \hline
+    \end{tabular}
+\label{tabla}
+\end{table}
+
+Para hacer su comprensión más fácil e intuitiva, se han representado estos datos en una gráfica para las peticiones/s \eqref{graf_pet} y otra para las peticiones que más tiempo han llevado \eqref{graf_tiem}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comparación de peticiones/s respecto a configuraciones de roundrobin y ponderación en cada balanceador}
+\label{graf_pet}
+\includegraphics[scale=0.05]{peticioness}
+\end{center}
+\end{figure}
+
+Se aprecia claramente como nginx cosigue mejores prestaciones en roundrobin y ponderación que el resto de balanceadores, siendo así la mejor opción en principio.
+
+En segunda posición, se encontraría haproxy, seguido de zevenet y después gobetween.
+
+Asimismo, destaca como pound consigue las peores en ambas configuraciones, convirtiéndose en la opción menos recomendable a escoger.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comparación de mayor tiempo de respuesta respecto a configuraciones de roundrobin y ponderación en cada balanceador}
+\label{graf_tiem}
+\includegraphics[scale=0.05]{longest}
+\end{center}
+\end{figure}
+
+Observando los tiempos de respuesta de las peticiones que más han tardado en atenderse, observamos una tendencia similar a la ya mencionada según las peticiones/s. El mejor sería nginx, seguido de haproxy, luego gobetween, zevenet y finalmente, por mucha distancia con el resto, pound.
+
+Llama la atención como en la configuración por ponderación los tiempos de respuesta son, en general, significativamente mayores a los de round robin, esto puede deberse a que una máquina (m1) recibe el doble de peticiones que la otra, cuando ambas tienen la misma potencia, y por tanto las peticiones que más tardan pueden tardar casi el doble en ser atendidas que en roundrobin.
+
+Pound es el único balanceador para el que los tiempos de respuestas con ponderación son menores a los tiempos de respuesta con roundrobin, lo que puede deberse a una casualidad (habría que lanzar el benchmark más veces y hacer la media) o simplemente ser así el funcionamiento de pound.
+
+Este análisis no es concluyente sobre qué balanceador puede ser mejor para una granja web, pues influyen muchos más factores de los aquí mencionados, pero a juzgar por los datos, el mejor a priori sería nginx y el peor pound.
 
 
 

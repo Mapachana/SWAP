@@ -352,7 +352,7 @@ Tras esto relanzamos el servicio y comprobamos que ahora sí funciona, y al habe
 
 ### Opciones avanzadas
 
-Podemos añadir, por ejemplo, a las directibas globales `TimeOut`, que es el tiempo que se espera una respuesta del backend.
+Podemos añadir, por ejemplo, a las directivas globales `TimeOut`, que es el tiempo que se espera una respuesta del backend.
 
 https://linux.die.net/man/8/pound
 
@@ -381,7 +381,7 @@ Finalmente, y como con nginx y haproxy, se desactiva que se lance al inicio para
 
 Comenzamos instalando apache benchmark en la máquina anfitriona con el comando `sudo apt-get install -y apache2-utils`:
 
-![](./bench_1.png)
+![](./img/bench_1.png)
 
 Ahora, lanzamos nginx y lo configuramos con roundrobin, como antes.
 
