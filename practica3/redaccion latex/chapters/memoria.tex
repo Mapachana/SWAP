@@ -65,7 +65,7 @@ Y ahora modificamos el archivo \verb|/etc/nginx/conf.d/default.conf| como se ve 
 
 Y reiniciamos el servicio con \verb|sudo systemctl restart nginx| para asegurarnos de que se aplica la configuración.
 
-Comprobamos ahora accediendo a \verb|http://192.168.56.103/swap.html| en el navegador o mediante curl (como en \eqref{nginx_9} que las máquinas se turnan para servir el sitio web.
+Comprobamos ahora accediendo a \verb|http://192.168.56.103/swap.html| en el navegador o mediante curl (como en \eqref{nginx_9}) que las máquinas se turnan para servir el sitio web.
 
 \begin{figure}[h!]
 \begin{center}
@@ -133,7 +133,7 @@ También podemos activar las conexiones \verb|keepalive| por 3 segundos, ilustra
 \end{center}
 \end{figure}
 
-Otra opción es usar \verb|down|, que marca un servidor como permanentemente offline, y requiere de ser usado con \verb|ip_hash|, como se ve es \eqref{nginx_15}.
+Otra opción es usar \verb|down|, que marca un servidor como permanentemente offline, y requiere de ser usado con \verb|ip_hash|, como se ve en \eqref{nginx_15}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -226,9 +226,9 @@ Por ejemplo, para usar ip hash, editando de nuevo el archivo de configuración c
 \end{center}
 \end{figure}
 
-Y si relanzamos y comprobamos que funciona, pues siempre nos atiende m1.
+Y relanzamos y comprobamos que funciona, pues siempre nos atiende m1.
 
-Finalmente, también podemos poner de nuevo m2 en backup, como se muestra en \eqref{haproxy_9}.
+Además, también podemos poner de nuevo m2 en backup, como se muestra en \eqref{haproxy_9}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -302,7 +302,7 @@ Si además se quisiera configurar el timeout, se usaría \verb|stats timeout <n>
 
 \chapter{Gobetween}
 
-Comenzamos asegurandonos de que tanto nginx como haproxy no se estén ejecutando, y tras esto instalamos gobetween mediante snap ejecutando:
+Comenzamos asegurándonos de que tanto nginx como haproxy no se estén ejecutando, y tras esto instalamos gobetween mediante snap ejecutando:
 
 \begin{verbatim}
 sudo snap install gobetween --edge
@@ -546,7 +546,7 @@ Podemos añadir, por ejemplo, a las directivas globales \verb|TimeOut|, que es e
 
 xHTTP define los verbos HTTP que se aceptan.
 
-Además, si usamos Emergency, el servidor solo se usará cuando el resto de servidores fallen:
+Además, si usamos Emergency, el servidor solo se usará cuando el resto de servidores fallen.
 
 Editamos el fichero de configuración con estas opciones, como se ve en \eqref{pound_5}.
 
@@ -606,6 +606,8 @@ Donde lo mas relevante son las peticiones por segundo, que es el criterio princi
 
 También llama la atención cuál ha sido el tiempo más largo para atender a una petición.
 
+\section{Otros parámetros}
+
 Otras opciones aparte de \verb|-n| y \verb|-c| para indicar el número de peticiones y la concurrencia son:
 \begin{itemize}
 \item \verb|-q|: no muestra los mensajes de progreso.
@@ -615,7 +617,7 @@ Otras opciones aparte de \verb|-n| y \verb|-c| para indicar el número de petici
 \item \verb|-p| y \verb|-u|: indican si la petición es POST o PUT respectivamente, deben usarse con \verb|-T|, que indica la cabecera del content-type.
 \end{itemize}
 
-Lanzamos este mismo benchmark a todos los servidores, con round-robin y ponderación, considerando que m1 tiene el doble de capacidad que m2.
+\chapter{Análisis comparativo de distintos balanceadores en base a la carga con AB}
 
 Ahora, se someterá a la misma carga de 10000 peticiones con 10 de concurrencia a todos los balanceadores configurados, cada uno con round robin y ponderación, con m1 atendiendo el doble de peticiones que m2. Los resultados se muestran en la tabla \eqref{tabla}.
 
