@@ -59,9 +59,9 @@ Accdemos a la página, donde vemos en la parte de la url el candadito, aunque ti
 
 Si pulsamos sobre este candado y le damos a más información, nos muestra algo de información sobre el certificado.
 
-![](./ssla_4.png)
+![](./img/ssla_4.png)
 
-![](./ssla_6.png)
+![](./img/ssla_6.png)
 
 Finalmente, vamos a copiar los certificados de m1 en m2, para lo que vamos a usar scp.
 
@@ -114,7 +114,7 @@ Ahora editamos el fichero de configuración de nginx /etc/nginx/conf.d/default.c
 
 Relanzamos nginx con sudo systemctl restart nginx y comprobamos que podemos acceder al balanceador por https:
 
-![](./nginx_3.png)
+![](./img/nginx_3.png)
 
 ### Opciones avanzadas
 
