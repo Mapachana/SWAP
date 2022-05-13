@@ -211,5 +211,46 @@ Probamos a ejecutarlos y comprobamos que hay que loggearse como root para hacerl
 
 Para eliminar la configuración al inicio simplemente borramos los ficheros generados.
 
+## Instalación de certificados con certbot
+
+Vamos a realizar la configuración en m1 y m3, para apache y nginx respectivamente.
+
+Comenzamos instalando en cada una de las máquinas virtuales certbot como se muestra.
+
+![](./img/certbot_1.png)
+
+En m1 comenzamos instalando el plugin para apache ejecutando:
+
+![](./img/certbot_2.png)
+
+Ahora, para instalar un certificado ejecutamos el siguiente comando y rellenamos los datos que se nos piden:
+
+![](./img/certbot_3.png)
+
+Como no tenemos un dominio, el comando anterior nos da error.
+
+![](./img/certbot_4.png)
+
+Por ello, para solo generar el certificado se ejecuta:
+
+![](./img/certbot_5.png)
+
+Este comando crea el archivo /etc/cron.d/certbot sigueinte:
+
+![](./img/certbot_6.png)
+
+Para realizar la configuración de nginx análogamente se instala el plugin y se ejecutan los sigueintes comandos:
+
+![](./img/certbot_7.png)
+
+Y ejecutamos
+
+![](./img/certbot_8.png)
+
+Que de nuevo nos arroja el mismo error de antes al no disponer de un dominio correcto.
+
+Para generar el certificado ejecutamos:
+
+![](./img/certbot_9.png)
 
 
