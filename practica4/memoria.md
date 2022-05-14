@@ -41,11 +41,11 @@ Para configurar apache para que use el certificado SSL que acabamos de generar, 
 
 Configuramos el archivo /etc/apache2/sites-available/default-ssl con la información de nuestros certificados:
 
-![](./img/ssla1.png)
+![](./img/ssla_1.png)
 
 Ahora activamos el sitio default-ssl, para lo que ejecutamos:
 
-![](./img/ssla2.png)
+![](./img/ssla_2.png)
 
 Para comprobar que hemos realizado todo correctamente, ahora accedemos a m1 desde el navegador, como en las otras prácticas vamos a acceder a la página swap.html usando https.
 
@@ -159,7 +159,7 @@ El script de configuración básica se muestra a continuación:
 
 ![](./img/iptable_5.png)
 
-![](./img/iptable_5a)
+![](./img/iptable_5a.png)
 
 Comprobamos que podemos acceder por http y https a m1, pero no mediante ping:
 
@@ -167,7 +167,7 @@ Comprobamos que podemos acceder por http y https a m1, pero no mediante ping:
 
 También comprobamos que podemos acceder a m3 de igual manera:
 
-![](./img/iptable_6a)
+![](./img/iptable_6a.png)
 
 
 ### Configuración avanzada
@@ -180,12 +180,12 @@ Para ello, escribimos el script como se muestra:
 
 Copiamos los scripts a la máquinas m2 con scp y comprobamos que la granja funciona correctamente, pues ya no deja acceder a m1 directamente, pero sí mediante m3:
 
-![](./img/iptable_7.png)
 ![](./img/iptable_8.png)
+![](./img/iptable_9.png)
 
 Además, ya se puede hacer ping.
 
-![](./img/iptable_9.png)
+![](./img/iptable_10.png)
 
 ## Configurar cortafuegos al arranque
 
@@ -252,5 +252,4 @@ Que de nuevo nos arroja el mismo error de antes al no disponer de un dominio cor
 Para generar el certificado ejecutamos:
 
 ![](./img/certbot_9.png)
-
 
