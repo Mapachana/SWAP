@@ -1,7 +1,7 @@
 
 \chapter{Certificado autofirmado SSL}
 
-Vamos a comenzar trabajando en m1, todos los comandos y configuraciones que se van a mostrar a continuación se ralizarán en esta máquina.
+Vamos a comenzar trabajando en m1, todos los comandos y configuraciones que se van a mostrar a continuación se realizarán en esta máquina.
 
 Primero creamos la carpeta donde vamos a guardar los certificados \verb|/etc/apache2/ssl| y luego vamos a activar el módulo ssl y relanzamos apache, para lo que ejecutamos los comandos que se muestran en \eqref{ssl_1}.
 
@@ -58,7 +58,7 @@ Como opciones avanzadas, se van a comentar distintos argumentos para generar los
 
 \chapter{Apache con certificado SSL}
 
-Para configurar apache para que use el certificado SSL que acabamos de generar, vamos a empezar configurando la ruta de los certificados en apache.
+Para configurar apache para que use el certificado SSL que acabamos de generar vamos a empezar configurando la ruta de los certificados en apache.
 
 Editamos el archivo \verb|/etc/apache2/sites-available/default-ssl| con la información de nuestros certificados, como se muestra en \eqref{ssla_1}.
 
@@ -92,17 +92,17 @@ Nos informa de que la conexión no es segura porque el certificado es autofirmad
 \end{center}
 \end{figure}
 
-Tras el aviso, accedemos a la página, donde vemos ne la parte de la url el candado a la izquierda, aunque tiene una exclamación, indicando de nuevo que el certificado es autofirmado. Esto puede verse en \eqref{ssla_4}
+Tras el aviso, accedemos a la página, donde vemos en la parte de la url el candado a la izquierda, aunque tiene una exclamación, indicando de nuevo que el certificado es autofirmado. Esto puede verse en \eqref{ssla_4}
 
 \begin{figure}[h!]
 \begin{center}
 \caption{Acceso a swap.html de m1.}
 \label{ssla_4}
-\includegraphics[scale=0.5]{ssla_4}
+\includegraphics[scale=0.5]{ssla_5}
 \end{center}
 \end{figure}
 
-Si pulsamos sobre este candado y le damos a más infromación, nos muestra más detalles sobre el certificado, como se muestra en \eqref{ssla_6}.
+Si pulsamos sobre este candado y le damos a más información, nos muestra más detalles sobre el certificado, como se muestra en \eqref{ssla_6}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -124,7 +124,7 @@ Para ello, primero creamos el directorio para almacenar los certificados en cada
 \end{center}
 \end{figure}
 
-Ahora movemos los ficheros al mismo directorio que en m1 y repetimos el proceso para activar el módulo ssl, configuramos el archivo \verb|/etc/apache2/sites-available/default-ssl|, activarlo y reiniciamos apache, de forma análoga a como lo hemos hecho en m1, y comprobamos que funciona en \eqref{ssla_9}
+Ahora movemos los ficheros al mismo directorio que en m1 y repetimos el proceso para activar el módulo ssl, configuramos el archivo \verb|/etc/apache2/sites-available/default-ssl|, lo activamos y reiniciamos apache, de forma análoga a como lo hemos hecho en m1, y comprobamos que funciona en \eqref{ssla_9}
 
 \begin{figure}[h!]
 \begin{center}
@@ -327,7 +327,7 @@ Además, ya es posible hacer ping a todas las máquinas como en \eqref{iptable_1
 
 \chapter{Configurar cortafuegos al arranque}
 
-Para hacer persistentes las reglas y que se mantengan tras reiniciar las máquinas vamos a instalar \verb|iptables-persistent|. Para ello ejecutamos \eqref{persistent_1}
+Para hacer persistentes las reglas y que se mantengan tras reiniciar las máquinas vamos a instalar \verb|iptables-persistent|. Para ello ejecutamos el comando que se muestra en \eqref{persistent_1}
 
 \begin{figure}[h!]
 \begin{center}
@@ -354,7 +354,7 @@ iptables-save > /etc/iptables/rules.v4
 ip6tables-save > /etc/iptables/rules.v6
 \end{verbatim}
 
-Probamos a ejecutarlos y comprobamos que hay que loggearse como root para hacerlo, como vemos en \eqref{persistent_3}
+Probamos a ejecutarlos y comprobamos que hay que iniciar sesión como root para hacerlo, como vemos en \eqref{persistent_3}
 
 \begin{figure}[h!]
 \begin{center}
@@ -403,7 +403,7 @@ Ahora, para instalar un certificado ejecutamos el comando de \eqref{certbot_3} y
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Instalación de cerificado en m1.}
+\caption{Instalación de certificado en m1.}
 \label{certbot_3}
 \includegraphics[scale=0.5]{certbot_3}
 \end{center}
