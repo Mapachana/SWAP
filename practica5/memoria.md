@@ -147,7 +147,48 @@ https://dev.mysql.com/doc/refman/5.7/en/replication-administration-status.html
 
 ## Configuración maestro-maestro
 
+Para realizar la configuración maestro maestro vamos a repetir la configuración que ya hemos hecho de maestro esclavo, pero esta vez tomando como maestro a m2 y como esclavo a m1.
 
+De esta forma, ambas máquinas son maestras y esclavas a la vez, obteniendo así la configuración maestro-maestro.
+
+Como el archivo /etc/mysql/mysql.conf.d/mysqld.cnf ya está editado, comenzamos creando el usuario esclavo en m2.
+
+![](./img/maestro_1.png)
+
+Ahora mostramos el estado del maestro.
+
+![](./img/maestro_2.png)
+
+Ahora en m1 configuramos el esclavo con los datos del maestro y lanzamos el esclavo:
+
+![](./img/maestro_3.png)
+
+Eliminamos el bloqueo de las tablas:
+
+![](./img/maestro_4.png)
+
+Y ostramos el estado del esclavo:
+
+![](./img/maestro_5.png)
+
+Comprobamos que si introducimos en datos una fila desde m1 (nombre PruebaM1) se actualiza en m2 y viceversa:
+
+![](./img/maestro_8.png)
+![](-/img/maestro_9.png)
 
 ## Configuración IPTABLES
+
+Ya hemos terminado de configurar la replicación de base de datos, pero todas las pruebas y conexiones se han realizado con todas las reglas de iptables sin aplicar, es decir, se aceptaba todo el tráfico.
+
+Con el fin de proteger nuestra granja web, vamos a añadir reglas para abrir las conexiones de mysql (puerto 3306) solamente entre m1 y m2, de forma que toda la granja esté protegida como antes y se pueda realizar la replicación de bases de datos sin desactivar las reglas.
+
+Para ello, editamos el archivo /home/anabuenrua/configuracion_avanzada.sh en m1 y m2 como se muestra:
+
+![](./img/iptables_1.png)
+
+Donde en m1 ponemos la ip de m2 y en m2 la de m1.
+
+Comprobamos que funciona adecuadamente y hacemos las reglas persistentes como se indicaba en la práctica anterior:
+
+![](./img/iptables_3.png)
 
