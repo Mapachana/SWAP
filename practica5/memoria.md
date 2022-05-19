@@ -112,7 +112,7 @@ Por tanto, en sql ejecutamos:
 
 donde vemos que hemos tenido un error, ya que en nuestra versión de sql no se puede especificar IDENTIFIED BY con GRANT, por lo que lo omitimos.
 
-Y mostramos el estado del maestro y desbloqueamos las tablas.
+Y mostramos el estado del maestro.
 
 ![](./img/esclavo_4a.png)
 
@@ -150,5 +150,4 @@ https://dev.mysql.com/doc/refman/5.7/en/replication-administration-status.html
 
 
 ## Configuración IPTABLES
-
 
