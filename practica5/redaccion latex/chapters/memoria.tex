@@ -1,12 +1,315 @@
 
-\chapter{Cosas}
+\chapter{Base de datos mysql}
 
+Antes de comenzar la práctica, vamos a desactivar las reglas de \verb|IPTABLES| que creamos durante la práctica anterior, ya que tal y como lo configuramos antes el puerto de mysql está cerrado en todas las máquinas.
+
+Para ello, vamos a ejecutar el script \verb|aceptar_todas.sh| ubicado en \verb|/home/anabuenrua/scripts_iptable/aceptar_todas.sh| con \verb|sudo bash aceptar_todas.sh| en todas las máquinas.
+
+Además, como hicimos persistentes las reglas, cada vez que reiniciemos alguna de las máquinas volveremos a desactivar las reglas.
+
+Ahora sí podemos comenzar con la configuración de la práctica propiamente dicha.
+
+Comenzamos comprobando la versión de mysql en \eqref{mysql_1} para comprobar que está instalado y poder configurar las máquinas adecuadamente de acuerdo con su versión de mysql.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{mysql_1}
+\includegraphics[scale=0.5]{mysql_1}
+\end{center}
+\end{figure}
+
+Ahora vamos a conectarnos al servidor de mysql. No vamos a usar ninguna contraseña, así que cuando nos la pide le damos a enter.
+
+A continuación creamos la base de datos 'estudiante' y le decimos que la use. Una vez en ella creamos la tabla 'datos', que va a contener campos para el nombre, apellidos, usuario y correo.
+
+Finalmente añado mis datos a la tabla insertando una tupla.
+
+Este procedimiento puede verse en \eqref{mysql_2}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Creación de la base de datos estudiante y su tabla datos, insertando una tupla.}
+\label{mysql_2}
+\includegraphics[scale=0.5]{mysql_2}
+\end{center}
+\end{figure}
+
+
+\section{Opciones avanzadas}
+
+Como opciones avanzadas, a la hora de crear las tablas podemos especificar que ciertos campos sean no nulos, sen únicos o que se usen como clave primaria (deben ser no nulos y únicos).
+
+Para ello se usan las palabras clave \verb|NOT NULL|, \verb|UNIQUE| y \verb|PRIMARY KEY|. Un ejemplo de uso en una tabla de ejemplo sería:
+
+\begin{verbatim}
+CREATE TABLE tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) UNIQUE,
+    start_date DATE NOT NULL,
+    end_date DATE
+);
+\end{verbatim}
+
+Además, al insertar nuevas tuplas no hace falta indicar los campos de la tabla donde se va a insertar el valor mientras los valores se especifiquen en el mismo orden de definición de los campos.
+
+También, para consultar información sobre las tablas podemos usar \verb|SELECT| para ver su contenido o |DESCRIBE|, como se ve en \eqref{mysql_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Uso de SELECT y DESCRIBE para consultar información de la tabla datos.}
+\label{mysql_3}
+\includegraphics[scale=0.5]{mysql_3}
+\end{center}
+\end{figure}
+
+\chapter{Mysqldump}
+
+A continuación vamos a replicar la base de datos estudiante de m1 en m2 usando \verb|mysqldump|.
+
+Comenzamos bloqueando las tablas para que sean de solo lectura, y así asegurarnos de que no se modifican mientras se realiza la copia. Se puede ver en \eqref{dump_1}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Establecemos bloqueo en las tablas de solo lectura.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+Copiamos la base de datos en un archivo \verb|/tmp/estudiante.sql| con \verb|mysqldump| y, una vez terminado, eliminamos el bloqueo a las tablas que habíamos puesto antes, como se muestra en \eqref{dump_2}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Volcado de la base de datos y desbloqueo de las tablas.}
+\label{dump_2}
+\includegraphics[scale=0.5]{dump_2}
+\end{center}
+\end{figure}
+
+Ahora copiamos el fichero generado en m1 a m2 mediante scp. \eqref{dump_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Copia de /tmp/estudiante.sql de m1 a m2}
+\label{dump_3}
+\includegraphics[scale=0.5]{dump_3}
+\end{center}
+\end{figure}
+
+Finalmente copiamos la base de datos en m2 primero creando la base de datos en sí y luego restaurando los datos de esta, como se ve en \eqref{dump_4}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Restauramos la base de datos en m2.}
+\label{dump_4}
+\includegraphics[scale=0.5]{dump_4}
+\end{center}
+\end{figure}
+
+Ya podemos comprobar que la base de datos se ha copiado correctamente.
+
+
+\section{Opciones avanzadas}
+
+\verb|mysqldump| tiene varias opciones para ahorrarnos trabajo y asegurarnos de que no cometemos errores importantes como no bloquear las tablas mientras las copiamos, dejarnos bases de datos de interés sin copiar o similares.
+
+De entre esas opciones destacan \verb|--all-databases|, que sirve para copiar todas las bases de datos. Si solo queremos algunas, podemos usar \verb|--databases <db1> <db2> ...|. 
+
+Otra opción interesante es \verb|--add-drop-table|, que añade un drop table antes de la creación de cualquier tabla.
+
+\verb|--lock-tables| bloquea todas las tablas mientras se realiza la copia, evitando así que tengamos que bloquearlas a mano como hemos hecho nosotros.
+
+Finalmente, para obtener información del proceso podemos usar \verb|-v|, que activa el modo verboso.
+
+El uso de algunas de estas opciones puede verse en \eqref{dump_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Opciones avanzadas de mysqldump.}
+\label{dump_5}
+\includegraphics[scale=0.5]{dump_5}
+\end{center}
+\end{figure}
+
+\chapter{Configuración maestro-esclavo}
+
+Para aplicar una configuración maestro-esclavo lo primero es editar el fichero \verb|/etc/mysql/mysql.conf.d/mysqld.cnf| en m1 como se muestra, comentando la línea de \verb|bind-address|, especificando los ficheros de log de error y de bin y poniendo el \verb|server-id| a 1. El fichero queda como se muestra en \eqref{esclavo_1}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero /etc/mysql/mysql.conf.d/mysqld.cnf.}
+\label{esclavo_1}
+\includegraphics[scale=0.5]{esclavo_1}
+\includegraphics[scale=0.5]{esclavo_2}
+\end{center}
+\end{figure}
+
+Reiniciamos el servicio con \verb|sudo systemctl restart mysql| y comprobamos que ha ido bien con \verb|sudo systemctl status mysql|.
+
+Ahora en m2 editamos el fichero \verb|/etc/mysql/mysql.conf.d/mysqld.cnf| igual que en m1, pero poniendo su \verb|server-id| a 2, y de nuevo reiniciamos el servicio como antes.
+
+Volviendo a m1, vamos a crear un usuario esclavo. Para crear el usuario correctamente, nos fijamos en la versión de mysql que se comprobó al principio, siendo esta la 8.0.28.
+
+Por tanto, en mysql ejecutamos las órdenes de \eqref{esclavo_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Creación del usuario esclavo, dándole privilegios y bloqueando las tablas.}
+\label{esclavo_3}
+\includegraphics[scale=0.5]{esclavo_3a}
+\end{center}
+\end{figure}
+
+En \eqref{esclavo_3} observamos que si intentamos otorgar privilegios como indica el guión con \verb|IDENTIFIED BY| da error. Al consultar la documentación vemos que en la versión de mysql que estamos usando no se debe indicar, así que repetimos la orden omitiendo esta parte y ya funciona sin problemas.
+
+También es destacable que al crear el usuario en \eqref{esclavo_3} usamos \verb|IDENTIFIED WITH'mysql_native_password'|, esto se debe a que realicé la configuración primeramente sin especificar esta opción, y por defecto se usa ssl con sha256, provocando que al intentar conectarse desde el esclavo ocurriera un error porque la conexión no era segura. El error que ocurría se muestra en \eqref{esclavo_error}. La solución de especificar esta opción la he obtenido de \href{aquí}{ https://stdworkflow.com/927/2061-authentication-plugin-caching-sha2-password-reported-error-authentication-require-secure-connection)}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Error al configurar maestro-esclavo al no especificar mysql\_native\_password}
+\label{esclavo_error}
+\includegraphics[scale=0.5]{ERROR}
+\end{center}
+\end{figure}
+
+Ahora mostramos el estado del maestro en \eqref{esclavo_4}, obteniendo así la información necesaria para configurar m2.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Estado del maestro.}
+\label{esclavo_4}
+\includegraphics[scale=0.5]{esclavo_4a}
+\end{center}
+\end{figure}
+
+Ahora con esta información configuramos en m2 los datos del maestro como se muestra en \eqref{esclavo_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Configuración de los datos del maestro en m2.}
+\label{esclavo_5}
+\includegraphics[scale=0.5]{esclavo_5a}
+\end{center}
+\end{figure}
+
+Finalmente quitamos el bloqueo de las tablas en m1 como se ve en \eqref{esclavo_6} y comprobamos el estado del esclavo \eqref{esclavo_7}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Desbloqueo de las tablas en m1 tras configurar m2.}
+\label{esclavo_6}
+\includegraphics[scale=0.5]{esclavo_7a}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Estado del esclavo.}
+\label{esclavo_8}
+\includegraphics[scale=0.5]{esclavo_8a}
+\end{center}
+\end{figure}
+
+Parece que funciona porque en \eqref{esclavo_8} el parámetro \verb|Seconds_Behind_Master| tiene valor 0.
+
+Finalmente nos aseguramos de que todo funciona correctamente, pues si insertamos un usuario 'prueba' en m1, vemos que aparece en m2, como se ve en \eqref{esclavo_9}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Insertamos tupla de prueba en m1 y comprobamos que los cambios se reflejan en m2.}
+\label{esclavo_9}
+\includegraphics[scale=0.5]{esclavo_9}
+\includegraphics[scale=0.5]{esclavo_10}
+\end{center}
+\end{figure}
+
+
+
+\chapter{Mostrar estado de los servidores}
+
+El estado del maestro puede verse en \eqref{esclavo_4} y el del esclavo en \eqref{€sclavo_8}. Vamos a interpretar superficialmente lo que nos están indicando estos estados.
+
+El estado del maestro nos muestra información necesaria para la configuración del esclavo.
+
+Por otra parte, el tener un valor $0$ en \verb|Seconds_Behind_Master| en el estado del esclavo, quiere decir que la base de datos de la máquina esclava lleva 0 segundos de retraso en procesar los binary-log que se han especificado.
+
+Que sea 0 suele significar que el esclavo está al día con el maestro, mientras que si tiene un valor mayor es que aún está procesando.
+
+\chapter{Configuración maestro-maestro}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+
+\chapter{Configuración de IPTABLES}
 
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Creación del directorio para almacenar los certificados, instalación del módulo ssl y relanzar apache.}
-\label{ssl_1}
-\includegraphics[scale=0.5]{ssl_1b}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
 \end{center}
 \end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Versión de mysql instalada en las másquinas virtuales.}
+\label{dump_1}
+\includegraphics[scale=0.5]{dump_1}
+\end{center}
+\end{figure}
+

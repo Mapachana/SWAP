@@ -61,7 +61,7 @@ Comenzamos bloqueando las tablas para que sean de solo lectura, y así asegurarn
 
 Copiamos la base de datos en un archivo /tmp/estudiante.sql con mysqldump y, una vez terminado, eliminamos el bloqueo a las tablas que habíamos puesto antes.
 
-![](./img/dump_3.png)
+![](./img/dump_2.png)
 
 Ahora copiamos este fichero de m1 a m2 mediante scp.
 
@@ -107,6 +107,10 @@ Por tanto, en sql ejecutamos:
 ![](./img/esclavo_3a.png)
 
 (Usamos el with native porque de lo contrario sale un error de que se requiere autenticación certificada, que se soluciona así https://stdworkflow.com/927/2061-authentication-plugin-caching-sha2-password-reported-error-authentication-require-secure-connection)
+
+
+
+
 
 ![](./img/ERROR.png)
 
@@ -174,7 +178,7 @@ Y ostramos el estado del esclavo:
 Comprobamos que si introducimos en datos una fila desde m1 (nombre PruebaM1) se actualiza en m2 y viceversa:
 
 ![](./img/maestro_8.png)
-![](-/img/maestro_9.png)
+![](./img/maestro_9.png)
 
 ## Configuración IPTABLES
 
