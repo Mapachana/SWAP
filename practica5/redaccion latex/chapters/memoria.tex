@@ -3,7 +3,9 @@
 
 Antes de comenzar la práctica, vamos a desactivar las reglas de \verb|IPTABLES| que creamos durante la práctica anterior, ya que tal y como lo configuramos antes el puerto de mysql está cerrado en todas las máquinas.
 
-Para ello, vamos a ejecutar el script \verb|aceptar_todas.sh| ubicado en \verb|/home/anabuenrua/scripts_iptable/aceptar_todas.sh| con \verb|sudo bash aceptar_todas.sh| en todas las máquinas.
+Para ello, vamos a ejecutar el script \verb|aceptar_todas.sh| ubicado en 
+
+\verb|/home/anabuenrua/scripts_iptable/aceptar_todas.sh| con \verb|sudo bash aceptar_todas.sh| en todas las máquinas.
 
 Además, como hicimos persistentes las reglas, cada vez que reiniciemos alguna de las máquinas volveremos a desactivar las reglas.
 
@@ -134,7 +136,9 @@ El uso de algunas de estas opciones puede verse en \eqref{dump_5}.
 
 \chapter{Configuración maestro-esclavo}
 
-Para aplicar una configuración maestro-esclavo lo primero es editar el fichero \verb|/etc/mysql/mysql.conf.d/mysqld.cnf| en m1 como se muestra, comentando la línea de \verb|bind-address|, especificando los ficheros de log de error y de bin y poniendo el \verb|server-id| a 1. El fichero queda como se muestra en \eqref{esclavo_1}.
+Para aplicar una configuración maestro-esclavo lo primero es editar el fichero
+
+\verb|/etc/mysql/mysql.conf.d/mysqld.cnf| en m1 como se muestra, comentando la línea de \verb|bind-address|, especificando los ficheros de log de error y de bin y poniendo el \verb|server-id| a 1. El fichero queda como se muestra en \eqref{esclavo_1}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -163,7 +167,9 @@ Por tanto, en mysql ejecutamos las órdenes de \eqref{esclavo_3}.
 
 En \eqref{esclavo_3} observamos que si intentamos otorgar privilegios como indica el guión con \verb|IDENTIFIED BY| da error. Al consultar la documentación vemos que en la versión de mysql que estamos usando no se debe indicar, así que repetimos la orden omitiendo esta parte y ya funciona sin problemas.
 
-También es destacable que al crear el usuario en \eqref{esclavo_3} usamos \verb|IDENTIFIED WITH'mysql_native_password'|, esto se debe a que realicé la configuración primeramente sin especificar esta opción, y por defecto se usa ssl con sha256, provocando que al intentar conectarse desde el esclavo ocurriera un error porque la conexión no era segura. El error que ocurría se muestra en \eqref{esclavo_error}. La solución de especificar esta opción la he obtenido de \href{aquí}{ https://stdworkflow.com/927/2061-authentication-plugin-caching-sha2-password-reported-error-authentication-require-secure-connection)}.
+También es destacable que al crear el usuario en \eqref{esclavo_3} usamos
+
+\verb|IDENTIFIED WITH'mysql_native_password'|, esto se debe a que realicé la configuración primeramente sin especificar esta opción, y por defecto se usa ssl con sha256, provocando que al intentar conectarse desde el esclavo ocurriera un error porque la conexión no era segura. El error que ocurría se muestra en \eqref{esclavo_error}. La solución de especificar esta opción la he obtenido de \href{https://stdworkflow.com/927/2061-authentication-plugin-caching-sha2-password-reported-error-authentication-require-secure-connection)}{aquí}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -228,7 +234,7 @@ Finalmente nos aseguramos de que todo funciona correctamente, pues si insertamos
 
 \chapter{Mostrar estado de los servidores}
 
-El estado del maestro puede verse en \eqref{esclavo_4} y el del esclavo en \eqref{€sclavo_8}. Vamos a interpretar superficialmente lo que nos están indicando estos estados.
+El estado del maestro puede verse en \eqref{esclavo_4} y el del esclavo en \eqref{esclavo_8}. Vamos a interpretar superficialmente lo que nos están indicando estos estados.
 
 El estado del maestro nos muestra información necesaria para la configuración del esclavo.
 
@@ -238,78 +244,93 @@ Que sea 0 suele significar que el esclavo está al día con el maestro, mientras
 
 \chapter{Configuración maestro-maestro}
 
+Para realizar la configuración maestro-maestro vamos a repetir la configuración que ya hemos hecho de maestro-esclavo, pero esta vez tomando como maestro a m2 y como esclavo a m1.
+
+De esta forma, ambas máquinas son maestras y esclavas a la vez, obteniendo así la configuración maestro-maestro.
+
+Como el archivo \verb|/etc/mysql/mysql.conf.d/mysqld.cnf| ya está editado, comenzamos creando el usuario esclavo en m2 como se muestra en \eqref{maestro_1}.
+
 \begin{figure}[h!]
 \begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
+\caption{Creación del usuario esclavo en m2 otorgándole privilegios y bloqueo de las tablas.}
+\label{maestro_1}
+\includegraphics[scale=0.5]{maestro_1}
+\end{center}
+\end{figure}
+
+Ahora mostramos el estado del maestro en \eqref{maestro_2}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Estado del maestro.}
+\label{maestro_2}
+\includegraphics[scale=0.5]{maestro_2}
+\end{center}
+\end{figure}
+
+Ahora en m1 configuramos el esclavo con los datos del maestro y lanzamos el esclavo, como se ve en \eqref{maestro_3}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Configuración de los datos del maestro en m1.}
+\label{maestro_3}
+\includegraphics[scale=0.5]{maestro_3}
+\end{center}
+\end{figure}
+
+Finalmente eliminamos el bloqueo se las tablas en \eqref{maestro_4} y comprobamos e estado del esclavo en \eqref{maestro_5}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Desbloqueo de las tablas en m2.}
+\label{maestro_4}
+\includegraphics[scale=0.5]{maestro_4}
 \end{center}
 \end{figure}
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
+\caption{Estado del esclavo.}
+\label{maestro_5}
+\includegraphics[scale=0.5]{maestro_5}
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
-\end{center}
-\end{figure}
+Comprobamos que si introducimos en datos una fila desde m1 (nombre PruebaM1) se actualiza en m2 y que pasa lo mismo si desde m2 introducimos una fila (nombre PruebaM2), como se muestra en \eqref{maestro_6}.
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
+\caption{Comprobación del correcto funcionamiento de la configuración maestro-maestro.}
+\label{maestro_6}
+\includegraphics[scale=0.5]{maestro_8}
+\includegraphics[scale=0.5]{maestro_9}
 \end{center}
 \end{figure}
 
-\begin{figure}[h!]
-\begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
-\end{center}
-\end{figure}
 
 \chapter{Configuración de IPTABLES}
 
+Ya hemos terminado de configurar la replicación de base de datos, pero todas las pruebas y conexiones se han realizado con todas las reglas de iptables sin aplicar, es decir, se aceptaba todo el tráfico.
+
+Con el fin de proteger nuestra granja web, vamos a añadir reglas para abrir las conexiones de mysql (puerto 3306) solamente entre m1 y m2, de forma que toda la granja esté protegida como antes y se pueda realizar la replicación de bases de datos sin desactivar las reglas.
+
+Para ello, editamos el archivo \verb|/home/anabuenrua/configuracion_avanzada.sh| en m1 y m2. Por ejemplo el fichero de m1 se muestra en \eqref{iptables_1}, para m2 bastaría cambiar la IP especificada.
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
+\caption{Fichero /home/anabuenrua/scripts\_iptable/config\_avanzada.sh para permitir tráfico por el puerto 3306 solo entre m1 a m2 de m1.}
+\label{iptables_1}
+\includegraphics[scale=0.5]{iptables_1}
 \end{center}
 \end{figure}
 
+Comprobamos que funciona adecuadamente y hacemos las reglas persistentes como se indicaba en la práctica anterio, como podemos ver en \eqref{iptables_2}.
+
 \begin{figure}[h!]
 \begin{center}
-\caption{Versión de mysql instalada en las másquinas virtuales.}
-\label{dump_1}
-\includegraphics[scale=0.5]{dump_1}
+\caption{Hacemos las reglas persistentes.}
+\label{iptables_2}
+\includegraphics[scale=0.5]{iptables_3}
 \end{center}
 \end{figure}
 
