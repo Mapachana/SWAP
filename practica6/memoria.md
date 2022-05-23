@@ -43,7 +43,15 @@ Comenzamos instalando las herramientas que vamos a usar
 
 A continuación creamos el punto de montaje datos en /home/anabuenrua, le asignamos los permisos y montamos la carpeta remota.
 
+192.168.56.105:/datos/compartido /home/anabuenrua/datos/ nfsauto,noatime,nolock,bg,nfsvers=3,intr,tcp,actimeo=1800 0 0
+
 ![](./img/config_7.png)
+
+Finalmente comprobamos que funciona, pues al crear un archivo en la carpeta datos en m1 se muestra en m2 y en nfs:
+
+![](./img/config_10.png)
+![](./img/config_11.png)
+![](./img/config_12.png)
 
 
 ### Opciones avanzadas
@@ -54,6 +62,14 @@ como se muestra.
 
 ![](./img/config_8.png)
 
+Además, en la máquina nfs-anabuenrua podemos comprobar qué puertos se están usando como se ve
+
+![](./img/config_9.png)
+
 ## Seguridad en NFS
+
+Comenzamos creando en nfs-anabuenrua en /home/anabuenrua una carpeta scripts_iptable para almacenar los ficheros de configuración de iptables como en las otras máquinas.
+
+
 
 ### Opciones avanzadas
