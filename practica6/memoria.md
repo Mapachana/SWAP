@@ -70,6 +70,61 @@ Además, en la máquina nfs-anabuenrua podemos comprobar qué puertos se están 
 
 Comenzamos creando en nfs-anabuenrua en /home/anabuenrua una carpeta scripts_iptable para almacenar los ficheros de configuración de iptables como en las otras máquinas.
 
+Vamos a crear un fichero en esta carpeta que contenga las reglas de seguridad por defecto de esta máquina.
 
+![](./img/iptables_1.png)
 
 ### Opciones avanzadas
+
+Como mountd y nlockmgr usan puertos dinámicos para poder escribir reglas de iptables primero vamos a fijar los puertos de estos servicios.
+
+Comenzamos fijando el puerto de mountd, para lo que editamos el fichero /etc/default/nfs-kernel-server editando la línea correspondiente para fijar el puerto 2000 (por ejemplo, podríamos asignar otro):
+
+![](./img/iptables_2.png)
+
+Para fijar el puerto de nlockmgr creamos el archivo swap-nfs-ports.conf en /etc/sysctl.d/ con el contenido siguiente para fijar los puertos de tcp y udp a 2001 y 2002 respectivamente:
+
+![](./img/iptables_3.png)
+
+Ahora reiniciamos el sistema especificando este archivo de configuración:
+
+![](./img/iptables_4.png)
+
+![](./img/iptables_5.png)
+
+![](./img/iptables_6.png)
+
+Y comprobamos finalmente los puertos una vez realizada esta configuración
+
+![](./img/iptables_7.png)
+
+Ahora que hemos fijado los puertos de estos servicios, podemos definir reglas para abrir los puertos correspondientes a estos servicios. Partiendo del fichero de configuración ya presentado, lo editamos como se ve
+
+![](./img/iptables_8.png)
+
+Comprobamos de nuevo que funciona correctamente generando un fichero de nuevo como antes:
+
+![](./img/iptables_9.png)
+![](./img/iptables_10.png)
+![](./img/iptables_11.png)
+
+Tras comprobar que la granja web funciona correctamente y está protegida, instalo en nfs-anabuenrua iptables-persistent como hicimos en la práctica 4 para hacer las reglas persistentes al inicio.
+
+![](./img/iptables_12.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
