@@ -11,7 +11,7 @@ Para realizar la práctica creamos la máquina virtual NFS-anabuenrua, que tendr
 \end{center}
 \end{figure}
 
-Ahora asignamos una IP estática a nfs-anabuenrua, se ha escogido 192.168.56.105 editando \verb|/etc/netplan/00-installer-config.yaml|, por tanto, el fichero quedaría como en \eqref{instal_2}.
+Ahora asignamos una IP estática a nfs-anabuenrua editando \verb|/etc/netplan/00-installer-config.yaml|. Se ha escogido como IP para esta máquina 192.168.56.105, por tanto, el fichero quedaría como en \eqref{instal_2}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -53,7 +53,7 @@ Ahora creamos la carpeta \verb|/datos/compartido| donde vamos a tener los ficher
 \end{center}
 \end{figure}
 
-A continuación editamos \verb|/etc/exports| para dar permisos de acceos a m1 y m2, como se ve en \eqref{config_4}.
+A continuación editamos \verb|/etc/exports| para dar permisos de acceso a m1 y m2, como se ve en \eqref{config_4}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -73,7 +73,7 @@ Finalmente relanzamos el servicio y comprobamos su estado. Esto puede consultars
 \end{center}
 \end{figure}
 
-Ahora vamos a configurar m1 y m2. Para no ser repetitivo, se va a realizar y mostrar la configuración solamente en m1, ya que en m2 se haría la misma.
+Ahora vamos a configurar m1 y m2. Para no repetirnos, se va a realizar y mostrar la configuración solamente en m1, ya que en m2 se haría la misma.
 
 Comenzamos instalando las herramientas que vamos a usar, como se ve en \eqref{config_6}
 
@@ -156,7 +156,7 @@ Como mountd y nlockmgr usan puertos dinámicos para poder escribir reglas de ipt
 
 Comenzamos fijando el puerto de mountd, para lo que editamos el fichero 
 
-\verb|/etc/default/nfs-kernel-server| editando la línea correspondiente para fijar el puerto 2000 (por ejemplo, podríamos asignar otro). Este fichero puede verse en \eqref{iptables_2}.
+\verb|/etc/default/nfs-kernel-server| editando la línea correspondiente para fijar el puerto 2000 (por ejemplo, podríamos asignar cualquier otro mientras que no esté en uso por otro servicio). Este fichero puede verse en \eqref{iptables_2}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -166,7 +166,7 @@ Comenzamos fijando el puerto de mountd, para lo que editamos el fichero
 \end{center}
 \end{figure}
 
-Para fijar el puerto de nlockmgr creamos el archivo \verb|swap-nfs-ports.conf| en \verb|/etc/sysctl.d/| con el contenido que se muestra en \eqref{iptables_3} para fijar los puertos de tcp y udp a 2001 y 2002 respectivamente.
+Para fijar el puerto de nlockmgr creamos el archivo \verb|swap-nfs-ports.conf| en \verb|/etc/sysctl.d/| con el contenido que se muestra en \eqref{iptables_3} para fijar los puertos de tcp y udp a 2001 y 2002 respectivamente. De nuevo, estos puertos podrían cambiarse por otros que estén libres.
 
 \begin{figure}[h!]
 \begin{center}

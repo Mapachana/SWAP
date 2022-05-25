@@ -1,17 +1,17 @@
 
 \chapter{Base de datos mysql}
 
-Antes de comenzar la práctica, vamos a desactivar las reglas de \verb|IPTABLES| que creamos durante la práctica anterior, ya que tal y como lo configuramos antes el puerto de mysql está cerrado en todas las máquinas.
+Antes de comenzar la práctica, vamos a desactivar las reglas de \verb|IPTABLES| que creamos durante la práctica anterior dejando las reglas por ddefecto, ya que tal y como lo configuramos antes el puerto de mysql está cerrado en todas las máquinas.
 
 Para ello, vamos a ejecutar el script \verb|aceptar_todas.sh| ubicado en 
 
 \verb|/home/anabuenrua/scripts_iptable/aceptar_todas.sh| con \verb|sudo bash aceptar_todas.sh| en todas las máquinas.
 
-Además, como hicimos persistentes las reglas, cada vez que reiniciemos alguna de las máquinas volveremos a desactivar las reglas.
+Además, como hicimos persistentes las reglas, cada vez que reiniciemos alguna de las máquinas tendremos que volver a desactivar las reglas para que todo funcione correctamente.
 
-Ahora sí podemos comenzar con la configuración de la práctica propiamente dicha.
+Ahora sí podemos empezar con la configuración de la práctica propiamente dicha.
 
-Comenzamos comprobando la versión de mysql en \eqref{mysql_1} para comprobar que está instalado y poder configurar las máquinas adecuadamente de acuerdo con su versión de mysql.
+Comenzamos comprobando la versión de mysql en \eqref{mysql_1} para comprobar que está instalado y poder configurar las máquinas adecuadamente de acuerdo con su versión de mysql más adelante.
 
 \begin{figure}[h!]
 \begin{center}
@@ -21,13 +21,11 @@ Comenzamos comprobando la versión de mysql en \eqref{mysql_1} para comprobar qu
 \end{center}
 \end{figure}
 
-Ahora vamos a conectarnos al servidor de mysql. No vamos a usar ninguna contraseña, así que cuando nos la pide le damos a enter.
+Ahora vamos a conectarnos al servidor de mysql. No vamos a usar ninguna contraseña por comodidad, así que cuando nos la pide le damos a enter.
 
-A continuación creamos la base de datos 'estudiante' y le decimos que la use. Una vez en ella creamos la tabla 'datos', que va a contener campos para el nombre, apellidos, usuario y correo.
+A continuación creamos la base de datos 'estudiante' y le decimos que la use. Una vez la tenemos seleccionada creamos la tabla 'datos', que va a contener campos para el nombre, apellidos, usuario y correo de cada estudiante.
 
-Finalmente añado mis datos a la tabla insertando una tupla.
-
-Este procedimiento puede verse en \eqref{mysql_2}
+Finalmente añado mis datos a la tabla insertando una tupla, siendo estos Ana Buendía Ruiz-Azuaga, con usuario anabuenrua y correo anabuenrua@correo.ugr.es. Este procedimiento puede verse en \eqref{mysql_2}
 
 \begin{figure}[h!]
 \begin{center}
@@ -40,7 +38,7 @@ Este procedimiento puede verse en \eqref{mysql_2}
 
 \section{Opciones avanzadas}
 
-Como opciones avanzadas, a la hora de crear las tablas podemos especificar que ciertos campos sean no nulos, sen únicos o que se usen como clave primaria (deben ser no nulos y únicos).
+Como opciones avanzadas, a la hora de crear las tablas podemos especificar que ciertos campos sean no nulos, sean únicos o que se usen como clave primaria (deben ser no nulos y únicos).
 
 Para ello se usan las palabras clave \verb|NOT NULL|, \verb|UNIQUE| y \verb|PRIMARY KEY|. Un ejemplo de uso en una tabla de ejemplo sería:
 
@@ -53,7 +51,7 @@ CREATE TABLE tasks (
 );
 \end{verbatim}
 
-Además, al insertar nuevas tuplas no hace falta indicar los campos de la tabla donde se va a insertar el valor mientras los valores se especifiquen en el mismo orden de definición de los campos.
+Además, al insertar nuevas tuplas no hace falta indicar los campos de la tabla donde se va a insertar el valor mientras los valores se especifiquen en el mismo orden de definición de los campos. Aún así, esto puede traer problemas porque si tenemos scripts para introducir las tuplas y cambiamos la estructura de la tabla, también habría que reescribir todos los scripts para insertar las tuplas. Por ello no suele usarse.
 
 También, para consultar información sobre las tablas podemos usar \verb|SELECT| para ver su contenido o |DESCRIBE|, como se ve en \eqref{mysql_3}.
 
@@ -69,17 +67,17 @@ También, para consultar información sobre las tablas podemos usar \verb|SELECT
 
 A continuación vamos a replicar la base de datos estudiante de m1 en m2 usando \verb|mysqldump|.
 
-Comenzamos bloqueando las tablas para que sean de solo lectura, y así asegurarnos de que no se modifican mientras se realiza la copia. Se puede ver en \eqref{dump_1}
+Comenzamos bloqueando las tablas para que sean de solo lectura, y así asegurarnos de que no se modifican mientras se realiza la copia. Se puede ver en \eqref{dump_1}.
 
 \begin{figure}[h!]
 \begin{center}
-\caption{Establecemos bloqueo en las tablas de solo lectura.}
+\caption{Establecemos bloqueo en las tablas para que solo se permita lectura.}
 \label{dump_1}
 \includegraphics[scale=0.5]{dump_1}
 \end{center}
 \end{figure}
 
-Copiamos la base de datos en un archivo \verb|/tmp/estudiante.sql| con \verb|mysqldump| y, una vez terminado, eliminamos el bloqueo a las tablas que habíamos puesto antes, como se muestra en \eqref{dump_2}
+Copiamos la base de datos en un archivo \verb|/tmp/estudiante.sql| con \verb|mysqldump| y, una vez terminado, eliminamos el bloqueo a las tablas que habíamos puesto antes, como se muestra en \eqref{dump_2}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -99,7 +97,7 @@ Ahora copiamos el fichero generado en m1 a m2 mediante scp. \eqref{dump_3}.
 \end{center}
 \end{figure}
 
-Finalmente copiamos la base de datos en m2 primero creando la base de datos en sí y luego restaurando los datos de esta, como se ve en \eqref{dump_4}.
+Finalmente replicamos la base de datos en m2 primero creando la base de datos en sí y luego restaurando los datos de esta usando el fichero que hemos copiado de m1, como se ve en \eqref{dump_4}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -118,13 +116,13 @@ Ya podemos comprobar que la base de datos se ha copiado correctamente.
 
 De entre esas opciones destacan \verb|--all-databases|, que sirve para copiar todas las bases de datos. Si solo queremos algunas, podemos usar \verb|--databases <db1> <db2> ...|. 
 
-Otra opción interesante es \verb|--add-drop-table|, que añade un drop table antes de la creación de cualquier tabla.
+Otra opción interesante es \verb|--add-drop-table|, que añade un drop table antes de la creación de cualquier tabla. Así, antes de crear cualquier tabla, si existía previamente en la base de datos primero la borra y luego la crea.
 
 \verb|--lock-tables| bloquea todas las tablas mientras se realiza la copia, evitando así que tengamos que bloquearlas a mano como hemos hecho nosotros.
 
 Finalmente, para obtener información del proceso podemos usar \verb|-v|, que activa el modo verboso.
 
-El uso de algunas de estas opciones puede verse en \eqref{dump_5}.
+El uso de algunas de estas opciones avanzadas puede verse en \eqref{dump_5}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -165,7 +163,7 @@ Por tanto, en mysql ejecutamos las órdenes de \eqref{esclavo_3}.
 \end{center}
 \end{figure}
 
-En \eqref{esclavo_3} observamos que si intentamos otorgar privilegios como indica el guión con \verb|IDENTIFIED BY| da error. Al consultar la documentación vemos que en la versión de mysql que estamos usando no se debe indicar, así que repetimos la orden omitiendo esta parte y ya funciona sin problemas.
+En \eqref{esclavo_3} observamos que si intentamos otorgar privilegios como indica el guión con \verb|IDENTIFIED BY| da error. Al consultar la documentación vemos que en la versión de mysql que estamos usando no se debe indicar esta opción, así que repetimos la orden omitiendo esta parte y ya funciona sin problemas.
 
 También es destacable que al crear el usuario en \eqref{esclavo_3} usamos
 
@@ -179,7 +177,7 @@ También es destacable que al crear el usuario en \eqref{esclavo_3} usamos
 \end{center}
 \end{figure}
 
-Ahora mostramos el estado del maestro en \eqref{esclavo_4}, obteniendo así la información necesaria para configurar m2.
+Ahora mostramos el estado del maestro en \eqref{esclavo_4}, obteniendo así la información necesaria para configurar m2 después.
 
 \begin{figure}[h!]
 \begin{center}
@@ -199,7 +197,7 @@ Ahora con esta información configuramos en m2 los datos del maestro como se mue
 \end{center}
 \end{figure}
 
-Finalmente quitamos el bloqueo de las tablas en m1 como se ve en \eqref{esclavo_6} y comprobamos el estado del esclavo \eqref{esclavo_7}.
+Finalmente quitamos el bloqueo de las tablas en m1 como se ve en \eqref{esclavo_6} y comprobamos el estado del esclavo \eqref{esclavo_8}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -234,7 +232,7 @@ Finalmente nos aseguramos de que todo funciona correctamente, pues si insertamos
 
 \chapter{Mostrar estado de los servidores}
 
-El estado del maestro puede verse en \eqref{esclavo_4} y el del esclavo en \eqref{esclavo_8}. Vamos a interpretar superficialmente lo que nos están indicando estos estados.
+El estado del maestro puede verse en \eqref{esclavo_4} y el del esclavo en \eqref{esclavo_8}. Vamos a interpretar brevemente lo que nos están indicando estos estados.
 
 El estado del maestro nos muestra información necesaria para la configuración del esclavo.
 
@@ -244,7 +242,7 @@ Que sea 0 suele significar que el esclavo está al día con el maestro, mientras
 
 \chapter{Configuración maestro-maestro}
 
-Para realizar la configuración maestro-maestro vamos a repetir la configuración que ya hemos hecho de maestro-esclavo, pero esta vez tomando como maestro a m2 y como esclavo a m1.
+Para realizar la configuración maestro-maestro vamos a repetir la configuración que ya hemos hecho de maestro-esclavo, pero esta vez tomando como maestro a m2 y como esclavo a m1, esto es, inviertiendo los roles de antes.
 
 De esta forma, ambas máquinas son maestras y esclavas a la vez, obteniendo así la configuración maestro-maestro.
 
@@ -278,7 +276,7 @@ Ahora en m1 configuramos el esclavo con los datos del maestro y lanzamos el escl
 \end{center}
 \end{figure}
 
-Finalmente eliminamos el bloqueo se las tablas en \eqref{maestro_4} y comprobamos e estado del esclavo en \eqref{maestro_5}.
+Finalmente eliminamos el bloqueo se las tablas en \eqref{maestro_4} y comprobamos el estado del esclavo en \eqref{maestro_5}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -310,9 +308,9 @@ Comprobamos que si introducimos en datos una fila desde m1 (nombre PruebaM1) se 
 
 \chapter{Configuración de IPTABLES}
 
-Ya hemos terminado de configurar la replicación de base de datos, pero todas las pruebas y conexiones se han realizado con todas las reglas de iptables sin aplicar, es decir, se aceptaba todo el tráfico.
+Ya hemos terminado de configurar la replicación de base de datos, pero todas las pruebas y conexiones se han realizado con todas las reglas de iptables que hicimos en la práctica anterior sin aplicar, es decir, se aceptaba todo el tráfico.
 
-Con el fin de proteger nuestra granja web, vamos a añadir reglas para abrir las conexiones de mysql (puerto 3306) solamente entre m1 y m2, de forma que toda la granja esté protegida como antes y se pueda realizar la replicación de bases de datos sin desactivar las reglas.
+Con el fin de proteger nuestra granja web, vamos a añadir reglas para abrir las conexiones de mysql (por el puerto 3306) solamente entre m1 y m2, de forma que toda la granja esté protegida como antes y se pueda realizar la replicación de bases de datos sin desactivar las reglas.
 
 Para ello, editamos el archivo \verb|/home/anabuenrua/configuracion_avanzada.sh| en m1 y m2. Por ejemplo el fichero de m1 se muestra en \eqref{iptables_1}, para m2 bastaría cambiar la IP especificada.
 
@@ -324,7 +322,7 @@ Para ello, editamos el archivo \verb|/home/anabuenrua/configuracion_avanzada.sh|
 \end{center}
 \end{figure}
 
-Comprobamos que funciona adecuadamente y hacemos las reglas persistentes como se indicaba en la práctica anterio, como podemos ver en \eqref{iptables_2}.
+Comprobamos que funciona adecuadamente y hacemos las reglas persistentes como se indicaba en la práctica anterior, como podemos ver en \eqref{iptables_2}.
 
 \begin{figure}[h!]
 \begin{center}
