@@ -38,7 +38,7 @@ Finalmente añado mis datos a la tabla insertando una tupla, siendo estos Ana Bu
 
 \section{Opciones avanzadas}
 
-Como opciones avanzadas, a la hora de crear las tablas podemos especificar que ciertos campos sean no nulos, sean únicos o que se usen como clave primaria (deben ser no nulos y únicos).
+Como opciones avanzadas, a la hora de crear las tablas podemos especificar que ciertos campos sean no nulos, sean únicos o que se usen como clave primaria (deben ser no nulos y únicos e identifican a la tupla).
 
 Para ello se usan las palabras clave \verb|NOT NULL|, \verb|UNIQUE| y \verb|PRIMARY KEY|. Un ejemplo de uso en una tabla de ejemplo sería:
 
@@ -53,7 +53,7 @@ CREATE TABLE tasks (
 
 Además, al insertar nuevas tuplas no hace falta indicar los campos de la tabla donde se va a insertar el valor mientras los valores se especifiquen en el mismo orden de definición de los campos. Aún así, esto puede traer problemas porque si tenemos scripts para introducir las tuplas y cambiamos la estructura de la tabla, también habría que reescribir todos los scripts para insertar las tuplas. Por ello no suele usarse.
 
-También, para consultar información sobre las tablas podemos usar \verb|SELECT| para ver su contenido o |DESCRIBE|, como se ve en \eqref{mysql_3}.
+También, para consultar información sobre las tablas podemos usar \verb|SELECT| para ver su contenido o \verb|DESCRIBE|, como se ve en \eqref{mysql_3}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -236,9 +236,9 @@ El estado del maestro puede verse en \eqref{esclavo_4} y el del esclavo en \eqre
 
 El estado del maestro nos muestra información necesaria para la configuración del esclavo.
 
-Por otra parte, el tener un valor $0$ en \verb|Seconds_Behind_Master| en el estado del esclavo, quiere decir que la base de datos de la máquina esclava lleva 0 segundos de retraso en procesar los binary-log que se han especificado.
+Por otra parte, el tener un valor $0$ en \verb|Seconds_Behind_Master| en el estado del esclavo, quiere decir que la base de datos de la máquina esclava lleva $0$ segundos de retraso en procesar los binary-log que se han especificado.
 
-Que sea 0 suele significar que el esclavo está al día con el maestro, mientras que si tiene un valor mayor es que aún está procesando.
+Que sea $0$ suele significar que el esclavo está al día con el maestro, mientras que si tiene un valor mayor es que aún está procesando.
 
 Además, en el estado del esclavo \eqref{esclavo_8} pueden verse los errores obtenidos. En \eqref{esclavo_8} no se muestra ningún error ya que la configuración ha resultado correctamente, pero en \eqref{esclavo_error} podemos ver un error al no poder conectarnos por SSL, como ya se ha comentado antes. Los errores de la configuración se muestran en las líneas de error LAST\_IO\_ERROR y LAST\_SQL\_ERROR muestra los error de SQL.
 
