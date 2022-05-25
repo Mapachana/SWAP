@@ -1,7 +1,7 @@
 
 \chapter{Instalación de la máquina virtual}
 
-Para realizar la práctica creamos la máquina virtual NFS-anabuenrua, que tendrá, al igual que las otras, 1GB de RAM y 10GB de disco duro dinámico. Además, se ha añadido antes de lanzar la máquina virtual el adaptador de red solo-anfitrión. Introducimos los datos como puede verse en \eqref{instal_1}.
+Para realizar la práctica creamos la máquina virtual NFS-anabuenrua, que tendrá, la misma capacidad de RAM y disco duro dinámico que las otras, esto es, 1GB y 10GB respectivamente. Además, se ha añadido antes de lanzar la máquina virtual el adaptador de red solo-anfitrión. Introducimos los datos como puede verse en \eqref{instal_1}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -11,7 +11,9 @@ Para realizar la práctica creamos la máquina virtual NFS-anabuenrua, que tendr
 \end{center}
 \end{figure}
 
-Ahora asignamos una IP estática a nfs-anabuenrua editando \verb|/etc/netplan/00-installer-config.yaml|. Se ha escogido como IP para esta máquina 192.168.56.105, por tanto, el fichero quedaría como en \eqref{instal_2}.
+Ahora asignamos una IP estática a nfs-anabuenrua editando 
+
+\verb|/etc/netplan/00-installer-config.yaml|. Se ha escogido como IP para esta máquina 192.168.56.105, por tanto, el fichero quedaría como en \eqref{instal_2}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -166,7 +168,7 @@ Comenzamos fijando el puerto de mountd, para lo que editamos el fichero
 \end{center}
 \end{figure}
 
-Para fijar el puerto de nlockmgr creamos el archivo \verb|swap-nfs-ports.conf| en \verb|/etc/sysctl.d/| con el contenido que se muestra en \eqref{iptables_3} para fijar los puertos de tcp y udp a 2001 y 2002 respectivamente. De nuevo, estos puertos podrían cambiarse por otros que estén libres.
+Para fijar el puerto de nlockmgr creamos el archivo \verb|swap-nfs-ports.conf| en \verb|/etc/sysctl.d/| con el contenido que se muestra en \eqref{iptables_3} para fijar los puertos de tcp y udp de nlockmgr a 2001 y 2002 respectivamente. De nuevo, estos puertos podrían cambiarse por otros que estén libres.
 
 \begin{figure}[h!]
 \begin{center}
