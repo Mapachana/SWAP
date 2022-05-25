@@ -1,5 +1,5 @@
 
-\chapter{Instalacón de la máquina virtual}
+\chapter{Instalación de la máquina virtual}
 
 Para realizar la práctica creamos la máquina virtual NFS-anabuenrua, que tendrá, al igual que las otras, 1GB de RAM y 10GB de disco duro dinámico. Además, se ha añadido antes de lanzar la máquina virtual el adaptador de red solo-anfitrión. Introducimos los datos como puede verse en \eqref{instal_1}.
 
@@ -112,10 +112,11 @@ Finalmente comprobamos que funciona, pues al crear un archivo en la carpeta dato
 Para comenzar, vamos a hacer que el montaje de la carpeta remota se realice de forma automática al arrancar la máquina virtual tanto en m1 como m2. Para ello, vamos a editar el fichero \verb|/etc/fstab| añadiendo la línea siguiente:
 
 \begin{verbatim}
-192.168.56.105:/datos/compartido /home/anabuenrua/datos/ nfsauto,noatime,nolock,\\bg,nfsvers=3,intr,tcp,actimeo=1800 0 0
+192.168.56.105:/datos/compartido /home/anabuenrua/datos/ nfsauto,noatime,
+nolock,bg,nfsvers=3,intr,tcp,actimeo=1800 0 0
 \end{verbatim}
 
-Pese a que hemos tenido que mostrarla en 2, este comando es una sola línea. El archivo editado puede verse en \eqref{¢onfig_9}.
+Pese a que hemos tenido que mostrarla en 2 líneas, esta es una sola línea. El archivo editado puede verse en \eqref{config_9}.
 
 \begin{figure}[h!]
 \begin{center}
@@ -137,10 +138,78 @@ Además, en la máquina nfs-anabuenrua podemos comprobar qué puertos se están 
 
 \chapter{Seguridad en NFS}
 
+Comenzamos creando en nfs-anabuenrua en \verb|/home/anabuenrua| una carpeta \verb|scripts_iptable| para almacenar los ficheros de configuración de iptables como en las otras máquinas.
 
+Vamos a crear un fichero en esta carpeta que contenga las reglas de seguridad por defecto de esta máquina. Este fichero puede consultarse en \eqref{iptables_1}.
 
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración básica de iptables.}
+\label{iptables_1}
+\includegraphics[scale=0.5]{iptables_1}
+\end{center}
+\end{figure}
 
+\section{Opciones avanzadas}
 
+Como mountd y nlockmgr usan puertos dinámicos para poder escribir reglas de iptables primero vamos a fijar los puertos de estos servicios.
+
+Comenzamos fijando el puerto de mountd, para lo que editamos el fichero 
+
+\verb|/etc/default/nfs-kernel-server| editando la línea correspondiente para fijar el puerto 2000 (por ejemplo, podríamos asignar otro). Este fichero puede verse en \eqref{iptables_2}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero /etc/default/nfs-kernel-server.}
+\label{iptables_2}
+\includegraphics[scale=0.5]{iptables_2}
+\end{center}
+\end{figure}
+
+Para fijar el puerto de nlockmgr creamos el archivo \verb|swap-nfs-ports.conf| en \verb|/etc/sysctl.d/| con el contenido que se muestra en \eqref{iptables_3} para fijar los puertos de tcp y udp a 2001 y 2002 respectivamente.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero /etc/sysctl.d/swap-nfs-ports.conf.}
+\label{iptables_3}
+\includegraphics[scale=0.5]{iptables_3}
+\end{center}
+\end{figure}
+
+Ahora reiniciamos el sistema especificando este archivo de configuración. En \eqref{iptables_4} se muestran los comandos empleados. Se omite la salida del primer comando debido a que es muy larga.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Reinicio del sistema especificando el archivo de configuración.}
+\label{iptables_4}
+\includegraphics[scale=0.5]{iptables_4}
+\includegraphics[scale=0.5]{iptables_6}
+\end{center}
+\end{figure}
+
+Y comprobamos finalmente los puertos una vez realizada esta configuración. Esto puede verse en \eqref{iptables_7}
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Comprobación de puertos asignados.}
+\label{iptables_7}
+\includegraphics[scale=0.5]{iptables_7}
+\end{center}
+\end{figure}
+
+Ahora que hemos fijado los puertos de estos servicios, podemos definir reglas para abrir los puertos correspondientes a estos. Partiendo del fichero de configuración ya presentado, lo editamos como se ve en \eqref{iptables_8}.
+
+\begin{figure}[h!]
+\begin{center}
+\caption{Fichero de configuración avanzada de iptables}
+\label{iptables_8}
+\includegraphics[scale=0.5]{iptables_8}
+\end{center}
+\end{figure}
+
+Finalmente comprobamos que todo funciona correctamente repitiendo la prueba que puede verse en \eqref{config_8}.
+
+Tras comprobar que la granja funciona correctamente y está bien protegida, usamos \verb|iptables-persistent| como hicimos en la práctica 4 (y se usó de nuevo en la 5) para hacer las reglas persistentes al inicio.
 
 
 
