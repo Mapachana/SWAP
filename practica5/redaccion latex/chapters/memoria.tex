@@ -203,7 +203,7 @@ Finalmente quitamos el bloqueo de las tablas en m1 como se ve en \eqref{esclavo_
 \begin{center}
 \caption{Desbloqueo de las tablas en m1 tras configurar m2.}
 \label{esclavo_6}
-\includegraphics[scale=0.5]{esclavo_7a}
+\includegraphics[scale=0.5]{esclavo_8a}
 \end{center}
 \end{figure}
 
@@ -211,7 +211,7 @@ Finalmente quitamos el bloqueo de las tablas en m1 como se ve en \eqref{esclavo_
 \begin{center}
 \caption{Estado del esclavo.}
 \label{esclavo_8}
-\includegraphics[scale=0.5]{esclavo_8a}
+\includegraphics[scale=0.5]{esclavo_6a}
 \end{center}
 \end{figure}
 
@@ -239,6 +239,8 @@ El estado del maestro nos muestra información necesaria para la configuración 
 Por otra parte, el tener un valor $0$ en \verb|Seconds_Behind_Master| en el estado del esclavo, quiere decir que la base de datos de la máquina esclava lleva 0 segundos de retraso en procesar los binary-log que se han especificado.
 
 Que sea 0 suele significar que el esclavo está al día con el maestro, mientras que si tiene un valor mayor es que aún está procesando.
+
+Además, en el estado del esclavo \eqref{esclavo_8} pueden verse los errores obtenidos. En \eqref{esclavo_8} no se muestra ningún error ya que la configuración ha resultado correctamente, pero en \eqref{esclavo_error} podemos ver un error al no poder conectarnos por SSL, como ya se ha comentado antes. Los errores de la configuración se muestran en las líneas de error LAST\_IO\_ERROR y LAST\_SQL\_ERROR muestra los error de SQL.
 
 \chapter{Configuración maestro-maestro}
 
