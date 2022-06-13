@@ -2192,20 +2192,239 @@ Para grandes transferencias se usa Jumbo Frame:
 
 ### 5. Tipos de tráfico
 
+Hay **patrones de tráfico** muy comunes en sitios web:
+
+- HTTP.
+- FTP o streaming.
+- Tienda web.
+
+![](./img/t6/7.png)
+
+#### 5.1 Tráfico HTTP
+
+Consume **ancho de banda** intensivamente y genera muchas conexiones por segundo.
+
+- HTTP 1.0 se necesita una conexión para cada objeto.
+- HTTP 1.1 envía con una sola conexión varios objetos.
+
+Necesidad de hacer las páginas web ligeras, de forma que los usuarios puedan cargarlas rápidamente.
+
+#### 5.2 Tráfico FTO o streaming
+
+Tras una conexión inicial (ya que usa UDP como protocolo), se envía una **gran cantidad de información**.
+
+El número de conexiones para este tipo de tráfico es muy bajo comparado con la cantidad de información enviada.
+
+Consumen el **ancho de banda máximo** rápidamente.
+
+#### 5.3 Tienda web
+
+La **velocidad** es el factor más importante.
+
+Buena experiencia de usuario: si el usuario se desespera navegando en la tienda web, gastará poco dinero.
+
+No se necesita un alto ancho de banda, ni tampoco va a haber demasiadas conexiones por segundo.
+
+Sin embargo, el sitio debe dar **soporte al máximo de usuarios** navegando en **sesiones largas al mismo tiempo**.
+
+### 6. Límite en las prestaciones
+
+**Existe un límite de tráfico** de red suficientemente alto que produce una **degradación grave en las prestaciones**.
+
+En unos casos ese límite es más fácil de alcanzar que en otros.
+
+Llegado a ese límite los **tiempos de respuesta** en las conexiones HTTP se degradan completamente, haciedno **imposible la conexión, perjudicando así la disponibilidad**:
+
+Si lo representamos gráficamente:
+
+![](./img/t6/8.png)
+
+Esta degradación en las prestaciones se debe a los cuellos de botella.
+
+Hay que estudiar los datos de la monitorización durante las pruebas para determinar las carencias.
+
+#### 6.1 Curva característica
+
+Al subir la carga, las prestaciones/productividad se degradan y dejan de crecer.
+
+![](./img/t6/9.png)
+
+#### 6.2 Cuando ocurren problemas
+
+Al fallar algún servicio, caen las prestaciones, luego también los tiempos de respuesta, al terminar las transacciones rápidamente con un error.
+
+En estos casos es interesante examinar los logs (acceso y error).
+
+![](./img/t6/10.png)
+
+Cada dispositivo de red puede comportarse de forma diferente, llegando a **cuelgues o reinicios**.
+
+Estos límites son difíciles de alcanzar... pero a mayor **número de características activas** en un balanceador, será más fácil alcanzar el límite:
+
+Si es capaz de procesar tráfico a 90Mbps (supoemos máximo 100Mbps), puede ver reducido su rendimiento a la mitad si le pedimos que haga análisis de URLs y que de soporte de cookies (requieren uso más intensivo de CPU para inspeccionar los paquetes completos y no solo la cabecera).
+
+### 7. Software para hacer tests
+
+Son necesarias herramientas para ejecutar en máquinas clientes y **crear una carga HTTP específica**.
+
+Se suelen usar los benchmarks como SPECweb o WebStone para simular un número determinado de clientes.
+
+El número de usuarios de un servidor web puede ser del orden de los millones de usuarios, así es que **simular un número pequeño de clientes no es realista**.
+
+Consideraciones a tener en cuenta cuando vamos a evaluar el rendimiento de un sitio web real:
+
+- Primero **fijar un número alto de usuarios**. Calcular el tiempo medio cuando hay un alto número de usuarios haciendo peticiones al sitio web.
+- Después, **evaluar cómo se comporta el servidor cuando tiene el doble de usuarios**. Un servidor que tarda el doble en atender al doble de usuarios será mejor que otro que al doblar el número de usuarios (la carga) pase a tardar el triple.
+
+En sistemas críticos, en lugar de usar (o desarrollar) una herramienta para generar la carga para los tests, se le puede **encargar a una empresa externa especializada**.
+
+Algunas empresas ofrecen su herramienta y realizan los tests: Micro Focus Intl. - Segue Software (SilkPerformer), HP (LoadRunner), Micro Focus Intl. - Compuware (QALoad), Rational (SiteLoad), RadView (WebLoad).
+
+#### 7.1 TIpos de pruebas
+
+Tenemos que elegir correctamente el tipo de pruebas:
+
+- **Humo (smoke):** pruebas preliminares para comprobar que el sistema está listo para los siguientes tests.
+- **Carga (load):** cargas lo más parecidas a la real. Se ejecutan en períodos cortos (1h). Para determinar los tiempos de respuesta que tendrán los usuarios.
+- **Capacidad (capacity):** actividad creciente hasta detectar el punto de saturación.
+- **Estrés (stress):** para analizar el efecto de aplicar de forma continuada una carga por encima de la capacidad del sistema.
+- **Sobrecarga (overload):** aplicar fuertes picos de carga durante cortos períodos.
+- **Estabilidad (stability):** cargas lo más similares posibles a la real, aplicadas durante 1 día o 1 semana.
+
+#### 7.2 Monitorización durante los tests
+
+Durante la sesión de pruebas, **recoger mediciones** que nos indiquen lo que está ocurriendo en el sistema en cada momento y cómo reacciona este en función de la carga introducida:
+
+- **Medidas de la calidad de servicio** ofrecida por el sistema a los usuarios (estadísticas proporcionadas por la misma **herramienta de simulación de carga**).
+- **Medidas relativas al consumo de recursos** del sistema (utilizando las **herramientas del sistema operativo**).
+
+#### 7.3 Software para los tests
+
+Diversas herramientas para comprobar el rendimiento de servidores web. Línea de comandos y de interfaz gráfica: Apache Benchmark, Siege, Weighttp, httperf, OpenWebLoad, The Grinder, OpenSTA, JMeter, WebStone.
+
+Las de líneas de comandos sobrecargan menos las máquinas.
+
+Estas herramientas permiten comprobar el rendimiento de cualquier servidor web (Apache, MS Internet Information Services -IIS, nginx, Cherokee, Tomcat, lighttpd, thttpd, etc).
+
+**Comprobar el rendimiento** del hardware, software o de alguna modificación que hayamos hecho.
+
+Es interesante combinarlo con wireshark.
+
+### 8. Apache Benchmark
+
+**ab** no simula con total fidelidad el uso del sitio web que pueden hacer los usuarios habitualmente.
+
+**Pide la misma página repetidamente**. Los usuarios reales no solicitan siempre la misma página.
+
+Las medidas dan una **idea aproximada del rendimiento** del sitio, pero no reflejan el rendimiento real.
+
+Va bien para **testear cómo se comporta el servidor** antes y después de modificar cierta configuración.
+
+Teniendo los datos del "estado base", podemos comparar cómo afecta una nueva configuración.
+
+Debemos **ejecutar el benchmark en otra máquina** diferente a la que hace de servidor web. Ambos procesos no deben consumir recursos de la misma máquina (veríamos un menor rendimiento).
+
+![](./img/t6/11.png)
+
+Sin embargo, al hacerlo remotamente, introducimos cierta latencia debido a las comunicaciones.
+
+Cada vez que ejecutemos el test obtendremos resultados ligeramente diferentes.
+
+Esto es debido a que en el servidor hay diferente número de procesos en cada instante, y además la red puede encontrarse más sobrecargada en un momento que en otro.
+
+Lo ideal es hacer al menos 30 ejecuciones, sacar resultados en **media y desviación estándar**, y representarlo gráficamente de forma adecuada.
+
+Para ejecutar el benchmark usamos la sintaxis:
+
+![](./img/t6/12.png)
+
+### 9. httperf
+
+**httperf** es una herramienta para medir el rendimiento de sitios web.
+
+Originalmente se desarrolló en los laboratorios de investigación de Hewlett-Packard.
+
+Si tenemos varios clienets, deberíamos hacer la **ejecución en todos simultáneamente**.
+
+De todas formas, puesot que los tests tardan varios minutos, que la ejecución comience con un segundo de diferencia, no afectará significativamente al resultado final.
+
+La sintaxis de ejecución es:
+
+![](./img/t6/13.png)
+
+Test del servidor máquina.com puerto 80. Pedirá, de forma repetida, la página llamada prueba.html.
+
+Abrirá un total de 5000 conexiones TCP para hacer con cada una de ellas peticiones HTTP (implica hacer la petición y esperar la respuesta).
+
+Hará 10 peticiones por conexión, y las hará a 200 conexiones por segundo (implica 2000 peticiones/s).
+
+`timeout` segundos que el cliente esperará respuesta. Si pasa ese tiempo, considerará que la llamada ha fallado.
+
+La salida será similar a:
+
+![](./img/t6/14.png)
+
+**Ejemplo**: El ratio de peticiones (request rate) es menor de 2000 (sale 1352.5 peticiones/s).
+
+O bien el servidor está saturado y no soporta 2000 peticiones por segundo, o bien el cliente no puede llegar a hacerlas.
+
+Ya sabemos el límite de nuestro servidor.
+
+Ha habido 1038 errores:
+
+- 1024 timeouts (tardó más de 5 segs en llegar la respuesta a httperf).
+- 14 fg-unavail: httperf intentaba abrir otro descriptor de fichero y no podía (se alcanzó el límite de descriptores abiertos por proceso establecido en el kernel de linux, que es precisamente 1024).
+
+La línea Net I/O muestra 24.6Mbps (muy por debajo de 100Mbps). Si estuviese cerca de 90Mbps, habría que mejorar el ancho de banda.
+
+### 10. OpenWebLoad
+
+**OpenWebLoad** es otra herramienta de línea de comandos para medir el rendimiento de servidores web.
+
+```bash
+openload [options] http://maquina.com 10
+```
+
+El programa recibe dos parámetros, muy similares a los de las herramientas anteriores:
+
+- la URL de la página en el servidor.
+- El número de clientes simultáneos que simularemos (es un parámetro opcional y el valor por defecto es 5).
+
+Sintaxis de uso:
+
+```bash
+openload maquina.com 10
+```
+
+Salida del benchmark:
+
+![](./img/t6/15.png)
+
+### 11. Siege
+
+**Siege** es una herramienta de generación de carga HTTP para benchmarking parecida a Apache Benchmark.
+
+```bash
+siege -b -t60S -v http://maquina.com
+```
+
+El programa recibe varios parámetros:
+
+- `-b` para indicar que haga los tests de forma continua, y no interactivos.
+- `-t` para indicar el tiempo que queremos que esté en ejecución el programa.
+- `-v` para indicar que genere una salida detallada.
+- La URL a la que queremos "atacar".
+
+Por defecto usará 15 conexiones concurrentes durante ese tiempo indicado.
+
+![](./img/t6/16.png)
 
 
 
 
 
 
-
-
-
-
-
-la siguiente tiene html
-
-aaaaa<div style="page-break-after: always;"></div>
-
+<div style="page-break-after: always;"></div>
 
 ## Tema 7: Nombre
+
