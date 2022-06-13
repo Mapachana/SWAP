@@ -1331,7 +1331,7 @@ Los balanceadores hardware son más eficientes que los sistemas basados en un or
 - Hacen **traducción NAT**, y analizan las cabeceras TCP/IP para derivar tráfico al servidor más adecuado, en función del servicio solicitado.
 - Se pueden configurar para **evitar algunos ataques** del tipo TCP SYN, DoS, ping of death, IP spoofing, etc.
 - Los balanceadores hardware permiten servir el contenido estático directamente: **caching service**. 
- 
+
 Así quitamos trabajo a los servidores finales.
 
 Analizan la petición HTTP y lo sirven de la forma más eficiente: o bien enviándolo a un grupo de servidores que servirán contenido estático o bien determinan el contenido estático más demandado y lo sirven directamente, cacheandolo en su memoria RAM.
@@ -2039,7 +2039,7 @@ Podremos restaurar una máquina rápida y fácilmente.
 
 **Opciones**: desde usar el comando **dd** de Linux hasta usar software propietario como **Intelligent Disaster Recovery** (Veritad Backup-Exec) o **Take Two**.
 
-### 8. COnclusiones
+### 8. Conclusiones
 
 - El **éxito** de un sitio web depende de su **seguridad**.
 - La seguridad no se puede pasar por alto.
@@ -2048,6 +2048,164 @@ Podremos restaurar una máquina rápida y fácilmente.
 - La **defensa en profundidad** implica mantener diferentes capas de seguridad, independientes entre ellas, de forma que si un atacante consigue pasar una, tendrá otra que superar. Así se dificulta en gran medida la consecución final de un ataque.
 - Se diseñarán **diferentes tipos de acceso** y se configurará el sistema para facilitar esos accesos exclusivamente denegando cualquier otro.
 
+<div style="page-break-after: always;"></div>
+
+
+## Tema 6: Medir prestaciones de la granja web
+
+### 1. Introducción
+
+**Medir las prestaciones** de nuestro sistema web:
+
+- Los servidores finales.
+- Los dispositivos de balanceo.
+- Elementos de red.
+
+**Objetivo**: Comprobar si cumplen unos mínimos requisitos de rendimiento.
+
+Aplicar una metodología de test de prestaciones para detectar posibles problemas de rendimiento.
+
+Principal **necesidad** de hacer los tests:
+
+- No son exclusivamente las caídas o errores de programación factores que influyen en el rendimiento.
+- Detectar posibles cuellos de botella e ineficiencias.
+- Detectar límite del sistema.
+
+**Limitaciones** de los tests:
+
+- Dificultad para hacer pruebas en un entorno de producción.
+- Dificultad para simular el comportamiento de los usuarios.
+
+Es muy importante **medir las prestaciones de los dispositivos de balanceo**.
+
+Según el sitio web, recomendaremos **diferentes métricas**:
+
+- Conexiones por segundo.
+- Número total de conexiones concurrentes.
+- Redimiento (en bits por segundo).
+
+### 2. Conexiones por segundo
+
+Es una de las métricas más importantes cuando hablamos del rendimiento de servidores web.
+
+Hace referencia al **número de conexiones de entrada** que cierto dispositivo puede manejar por segundo.
+
+También se llama transacciones por segundo o sesiones por segundo.
+
+Es un factor determinante, ya que **abrir y cerrar conexiones HTTP resulta muy costoso**.
+
+En el nivel que estamos tratando, es la operación principal.
+
+Para enviar datos hay que llevar a cabo una serie de pasos que pueden llegar a **sobrecargar el dispositivo de red**.
+
+Las aperturas y cierres de conexiones consumen muchos recursos.
+
+**Pasos para establecer una conexión HTTP**:
+
+- El cliente inicia la conexión HTTP enviando un paquete TCP SYN al puerto 80 del servidor web.
+- El servidor web envía un paquete ACK al cliente seguido de otro SYN.
+- El cliente envía un paquete ACK como respuesta.
+
+![](./img/t6/1.png)
+
+Ahora ya pueden comenzar a enviarse datos desde el servidor al cliente (normalmente será una página web).
+
+La **velocidad** a la que se gestionan las aperturas y cierres de conexiones es **fundamental**.
+
+Si cierto servidor web tiene un **tráfico HTTP alto** (muchas peticiones), **conexiones por segundo** será la métrica más importante.
+
+![](./img/t6/2.png)
+
+Para ver el número de conexiones por segundo ejecutamos:
+
+```bash
+netstat -an | grep :80 | sort
+netstat | grep http | wc -l
+netstat -n -p | grep SYN_REC | sort -u
+```
+
+![](./img/t6/3.png)
+
+### 3. Número de conexiones concurrentes
+
+Métrica para determinar **cuántas sesiones** de usuario TCP puede manejar el balanceador **al mismo tiempo**.
+
+**Limitado por la memoria o el procesador** del dispositivo.
+
+Varía desde varios miles a millones. Es un límite teórico, realmente no es tan alta.
+
+Esto en cuanto a las conexiones TCP... Sin embargo, para el **tráfico UDP** (streaming o tráfico DNS) el número de conexiones concurrentes no es un factor que afecte, ya que se trata de un protocolo "sin conexión": El receptor no reconoce haber recibido paquetes.
+
+No hay una fase de establecimiento de la conexión. No se mantiene información de estado.
+
+TCP mantiene información sobre el estado de la conexión para garantizar un servicio diable de transferencia de datos y control de congestión.
+
+Hoy en día, las webs de vídeos como Youtube o Vimeo, utilizan TCP ya que algunas organizaciones bloquean el tráfico UDP por cuestiones de seguridad.
+
+También se usa TCP para no colapsar el servidor, ya que TCP provee control de congestión.
+
+### 4. Rendimiento, en bits por segundo
+
+Hace referencia a la **velocidad** a la que el balanceador **maneja y pasa el tráfico**.
+
+Todos los dispositivos tienen una serie de factores que acaban limitando las prestaciones, basados en la estructura interna (hardware y software).
+
+Algunos desarrolladores de balanceadores de carga solo soportan Fast Ethernet, limitándolos así a 100Mbps.
+
+Algunas implementaciones no tienen el hardware o el software adecuado, con lo que quedan limitados a transferencias máximas de 80Mbps.
+
+Se mide en bits por segundo. Es combinación de las variables **"tamaño del paquete"** y **"paquetes por segundo"**.
+
+El paquete típico tiene un tamaño máximo (MTU, Maximum Transmitable Unit) de 1.5KB.
+
+Si hay que enviar más datos, se trocean en paquetes de este tamaño máximo.
+
+![](./img/t6/4.png)
+
+**Ejemplo**:
+
+- Un acceso por HTTP usando el método GET a un recurso de 100 Bytes podrá servirse en un solo paquete.
+- Un acceso por GET a un archivo de 32KB necesitará 21 paquetes, con 1.5KB de información útil (**payload**) en cada uno.
+
+![](./img/t6/5.png)
+
+#### 4.1 Grandes transferencias: Jumbo Frame
+
+Para grandes transferencias se usa Jumbo Frame:
+
+![](./img/t6/6.png)
+
+**Ventajas:**
+
+- Al ser paquetes más grandes requieren de menos dedicación de CPU para su procesado en tarjetas de red, routers, etc, adem´as de llegar antes.
+- Se minimiza el uso de bytes para la asignación de los datos que acompañan a la MTU, dedicando más bytes a datos enviados.
+- Aliviamos la carga de protocolo y menor ffragmentación de la información por la red.
+- Se mejora la carga en los programas que gestionan el tráfico de red, como son los cortafuegos.
+
+**Desventajas:**
+
+- Al aumentar el tamaño de los paquetes aumenta la latencia puesto que el tiempo de envío de los mismo es mayor, no siendo conveniente en redes con fuerte streaming.
+- En redes de baja/media calidad provoca que si un paquete no pasa la comprobación de errores debe volverse a reenviar, siendo mayor la información que se reenvía y el tiempo que se pierde en la tarea.
+- No es muy recomendable con redes que manejan paquetes pequeños (P2P) puesto que no se rinde al 100% de la configuración, es conveniente probar la administración por parte del router de esta mezcla.
+
+*Aquí hay una parte de análisis del tráfico con Wireshark con 40 capturas que se va a estudiar Rita, porque yo no.*
+
+### 5. Tipos de tráfico
 
 
 
+
+
+
+
+
+
+
+
+
+la siguiente tiene html
+
+aaaaa<div style="page-break-after: always;"></div>
+
+
+## Tema 7: Nombre
