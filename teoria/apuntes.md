@@ -2426,5 +2426,222 @@ Por defecto usará 15 conexiones concurrentes durante ese tiempo indicado.
 
 <div style="page-break-after: always;"></div>
 
-## Tema 7: Nombre
+## Tema 7: Almacenamiento en la granja web
 
+### 1. Introducción
+
+El **sistema de almacenamiento** de datos resulta **clave** en un sistema web de altas prestaciones.
+
+Parte del sistema donde se guarda la información, ya sea en una BD o en archivos.
+
+Diseñar teniendo en mente ciertos **requisitos** en cuanto a **escalibilidad es esencial**.
+
+Todo usuario que llegue al sistema accederá a los datos almacenados, y debemos estar preparados para servir datos a un **número creciente de usuarios**.
+
+Los **gestores de BD** y el diseño de estas deben ser **robustas** para soportar **múltiples accesos concurrentes**.
+
+Podemos **mejorar las prestaciones** de los sistemas de almacenamiento:
+
+- **Ampliación vertical**: Adquirir un mejor hardware más rápido y actualizado.
+- **Ampliación horizontal**: Replicar el almacenamiento entre varios servidores. Puede resultar más efectivo en cuanto a la escalabilidad.
+
+#### 1.1 Problemas de replicación
+
+Posibles problemas de realizar la replicación y repartir la carga:
+
+- El coste de nuevos servidores y almacenamiento.
+- La configuración de métodos y rutinas de replicación y sincronización.
+- La latencia en los procesos de replicación.
+- La necesidad de un sistema de balanceo de carga adecuado entre los servidores de BD.
+
+#### 1.2 Estrategias alternativas a replicación completa
+
+**Estrategias alternativas** a la replicación completa para mejorar el sistema de almacenamietno y BD:
+
+- **Realizar distribución funcional**: Dividir la BD global en varias secciones relativas a aplicaciones diferentes (por ejemplo inventario, usuarios, mensajería, etc). Configurar varios servidores que hospedarán cada sección de la BD. Es complicado mantener la integridad de los datos entre las diferentes secciones.
+- **Segmentar la BD**: Hacer una división lógica de la BD (por ejemplo en función del tipo de clientes o según períodos contables). Cada segmento queda almacenado en un servidor de BD, quedando repartida así la carga. Es complicado mantener la integridad de los datos entre las diferentes divisiones.
+
+Existen producos de **BD propietarios** en los cuales se pueden usar **extensiones** que facilitan la interacción entre varios servidores para gestionar una sola gran BD.
+
+Suelen depender estrechamente de un sistema operativo o de un sistema de distribución muy concretos.
+
+Son, por ejemplo, Oracle11g, SQL Server 1008 R2, Apache Cassandra, configurar con mysql un cluster de BD (en prácticas).
+
+### 2. Tecnologías hardware para BD
+
+El sistema de almacenamiento y de BD es un punto fundamental en cualquier sistema web actual.
+
+Una **mala configruación** afectará a las **prestaciones**.
+
+Hay que ser cuidadosos con el hardware y software.
+
+El hardware del resto del sistema web puede actualizars en cualquier momento casi sin que los usuarios lo noten, El de la BD es crítico, ya que no se podrá actualizar de forma fácil una vez que esté en funcionamiento.
+
+**Factores** a tener en cuenta al diseñar la arquitectura de BD:
+
+- El número de sesiones concurrentes en la BD puede afecta al rendimiento de la granja web completa (conexiones costosas).
+- El tipo de accesos a la BD también influye.
+- Las búsquedas que devuelvan resultados muy grandes afectarán al rendimiento de CPU, almacenamiento y red.
+- El tamaño total de la BD determinará el espacio para almacenamiento, y el tiempo necesario para hacer copias de seguridad y restaurarlas.
+- Conviene utilizar hardware redundante para los servidores.
+- Una gran cantidad de accesos a la BD por cada petición HTTP puede sobrecarga la conexión de red entre los servidores web y de BD.
+- Aquitectura de la BD basada en un cluster.
+- Una BD se podrá escalar en el futuro si desde el principio se instaló hardware con capacidad de ampliación (CPU, memoria, etc.) y se configuró de forma adecuada.
+
+### 3. Tecnología RAID
+
+**RAID** (Redundant Array of Independent Disks) es un sistema de almacenamiento que usa múltiples discos duros entre los que se distribuyen o replican los datos.
+
+Ofrece mayor integridad, mayor tolerancia a fallos, mayor rendimiento y mayor capacidad.
+
+La idea inicial es combinar varios dispositivos en un conjunto que ofrece mayor capacidad, fiabilidad y velocidad que un solo dispositivo de última generación más caro.
+
+Un **RAID por hardware** es mucho más rápido que uno configurado por software.
+
+Por **software** son mucho más flexibles:
+
+- Permiten construir RAID de particiones en lugar de discos completos.
+- Agrupar en un mismo RAID discos conectados en varias controladoras.
+
+La tecnología RAID soporta el uso de varios discos de reserva (**hot spare**), para usarse inmediatamente y de forma automática tras el fallo de uno de los discos.
+
+Esto reduce el tiempo del período de reparación al acortar el tiempo de reconstrucción del RAID:
+
+![](./img/t7/1.png)
+
+Hay diversos **métodos de almacenamiento**, llamados **niveles**, con diferente complejidad:
+
+- **RAID 0**: Conjunto dividido.
+- **RAID 1**: Conjunto en espejo.
+- **RAID 5**: Conjunto dividido con paridad distribuida.
+
+Podemos **anidar niveles RAID**: que un RAID pueda usarse como elemento básico de otro en lugar de discos físicos.
+
+#### 3.1 RAID 0
+
+**Reparte los datos entre varios discos**, luego hay una incremento en la **velocidad** de lectura y escritura, ya que se puede acceder a varios bloques consecutivos al mismo tiempo.
+
+Está configuración **no ofrece protección contra fallos** en los discos, ya que no se escribe información duplicada o información de paridad.
+
+**Striping**.
+
+![](./img/t7/2.png)
+
+La velocidad de transferencia (ideal) se puede ver como la suma de las velocidades de transferencia de todos los discos.
+
+Se suele usar en configuraciones de servidor NFS.
+
+### 3.2 RAID 1
+
+**Crea una copia exacta (o espejo) de un conjunto de datos en dos o más discos**. Ofrece **gran fiabilidad**, ya que para que el conjunto falle es necesario que lo hagan todos sus discos.
+
+Como los discos que forman el RAID 1 tienen hardware independiente, se puede **leer simultáneamente** dos datos diferentes en dos **discos diferentes**, por lo que su rendimiento se duplica.
+
+**mirroring**
+
+![](./img/t7/3.png)
+
+Es útil si la seguridad de los datos es más importante que la capacidad de almacenamiento total.
+
+Se recomienda tener controladoras independientes para cada disco.
+
+Ventajas desde el punto de vista administrativo: se puede poner un disco inactivo para hacer backup de los datos, mientras que el otro sigue dando servicio.
+
+#### 3.3 RAID 10
+
+**RAID 10** o RAID 1+0 es una **división de espejos**.
+
+La **duplicación** (RAID 1) significa grabar los datos en dos o más discos al mismo tiempo. Si un disco falla por completo, la duplicación conserva la información.
+
+El **reparto de los datos** (RAID 0) divide los datos en fragmentos y los graba en conjuntos distintos de forma sucesiva.
+
+**Mejora el rendimiento** porque el equipo puede obtener datos de más de un conjunto a la vez.
+
+![](./img/t7/4.png)
+
+![](./img/t7/5.png)
+
+#### 3.4 Ventajas y desventajas de RAID
+
+**Ventajas**:
+
+- Permite acceder a los datos aunque falle un disco.
+- Puede mejorar el rendimiento de ciertas aplicaciones (para archivos grandes mantiene tasas de transferencia altas).
+
+**Desventajas**:
+
+- No protege los datos (por ejemplo de virus).
+- No simplifica la recuperación de un desastre.
+- No mejora el rendimiento para todas las aplicaciones.
+- No facilita el traslado del almacenamiento a un sistema nuevo.
+
+### 4. Array de almacenamiento compartido: SSA
+
+Forma simple de **almacenamiento externo**.
+
+Dispositivo que incluye varios discos en rack:
+
+![](./img/t7/6.png)
+
+- Posee una interfac para conectar los discos a las controladoras (normalmente SCSI).
+- Número limitado de puertos para hacer la conexión entre servidores y almacenamiento.
+- Se suele usar para disponer del almacenamiento necesario para archivos y BD en clusters.
+- La posibilidad de manejo y la flexibilidad de un SSA es limitada. Aceptan cambios en caliente de discos y varias configuraciones RAID.
+- Dispositivos desarrollados por una empresa con unas especificaciones y herramientas propietarias.
+
+### 5. Área de almacenamiento en red: SAN
+
+**Red de almacenamiento especializada** que conecta dispositivos de almacenamiento a los servidores.
+
+Conjunto de dispositivos interconectados (discos, cintas, etc.) y servidores conectados a un canal de comunicación e intercambio de datos común (concentrador de alta velocidad).
+
+Gran flexibilidad y facilidad de manejo del almacenamiento.
+
+Se puede actualizar cualquier componente.
+
+![](./img/t7/7.png)
+
+- Red de alta velocidad (mínimo 1Gbps). Es como un bus de un ordenador, pero compartido entre varias máquinas.
+- Utiliza hardware de red muy especializado.
+- Una SAN ofrece una capa de abstracción entre los dispositivos de almacenamiento y los servidores, y permite que el espacio físico de almacenamiento crezca.
+- Se puede usar para almacenar archivos, compartir datos entre los servidores, mirroring de discos y backups.
+- Puede operar con SSA y NAS.
+- Permite que se añadan nuevos dispositivos al sistema (servidores o almacenamiento).
+
+### 6. Almacenamiento conectado a la red: NAS
+
+Dispositivo que **actúa como un servidor de ficheros**, pero ahorrando los recursos de tener una máquina más.
+
+Para almacenar copias de seguridad y para ofrecer espcio de almacenamiento compartido.
+
+![](./img/t7/8.png)
+
+- Conjunto de discos organizados en un dispositivo de red con IP y que puede conectarse a una red Ethernet.
+
+- Utilizando algún protocolo, como Internetwork, Packet Exchange (de Microsoft), NetBEUI (de Microsoft), Network File System (**NFS** de Sun) o IPE (de Novell).
+
+- Aparece **como otro servidor más** en la red.
+
+- Usan software específico para configurarlos y manejarlos (creación de unidades, gestión de permisos, etc).
+
+- Utilizan configuraciones RAID.
+
+  Un ejemplo de NAS es openmediavault, que es un sistema de almacenamiento en red basado en debian para configurar un NAS con un PC. Servicios: ssh, sftp, smb/cifs, rsync. Requisitos harware: 1GB de Ram, 2GB de disco para el SO y los discos duros que usen para el sistema de almacenamiento de red.
+
+### 7. Conclusiones
+
+La **arquitectura de almacenamiento** de la granja web resulta **fundamental** para la disponibilidad de las aplicaciones.
+
+El **escalado** del sistema de BD resultará muy importante a lo largo de la vida del sistema web.
+
+La configuración de un **sistema RAID** supondrá una mejora en la disponibilidad y en la seguridad de nuestros datos.
+
+Además, se mejorará la capacidad del sistema de entrada/salida a disco.
+
+Otras soluciones pasan por la instalación y configuración de **sistemas avanzados de almacenamiento** usando tecnologías de red (SSA, SAN y NAS).
+
+Estas tecnologías ofrecen **flexibilidad y la posibilidad de escalar** el sistema de almacenamiento en el futuro.
+
+En resumen, la **arquitectura de BD** del sistema web debe ser lo más robusta posible, con capacidad para crecer (**ampliable y escalable**).
+
+Convendrá realizar un buen análisis, adquirir un buen hardware e instalar un buen software al principio.
